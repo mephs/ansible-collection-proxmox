@@ -1,0 +1,10 @@
+{
+    "docs": "https://docs.ansible.com/ansible-core/2.16/dev_guide/testing/sanity/pep8.html", 
+    "results": [
+        {
+            "message": "The test `ansible-test sanity --test pep8` [[explain](https://docs.ansible.com/ansible-core/2.16/dev_guide/testing/sanity/pep8.html)] failed with 1 error:", 
+            "output": "proxmox/plugins/modules/role.py:195:11: E121: continuation line under-indented for hanging indent"
+        }
+    ], 
+    "verified": false
+}

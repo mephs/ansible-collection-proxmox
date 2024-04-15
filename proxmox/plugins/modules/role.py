@@ -36,7 +36,6 @@ options:
       - If V(false), only specified O(privileges) will be added to the role,
         removing any other privileges.
     type: bool
-    default: false
 
   name:
     description: A name of the role.
@@ -64,6 +63,14 @@ author:
 '''
 
 EXAMPLES = r'''
+- name: Create an empty role
+  rusmephist.proxmox.role:
+    name: empty_role
+    state: present
+    api_host: node1
+    api_user: root@pam
+    api_password: Secret123
+
 - name: Create a role with given privileges
   rusmephist.proxmox.role:
     name: role1
@@ -158,7 +165,7 @@ class ProxmoxRoleModule(ProxmoxModule):
             self.module.fail_json(msg="Failed to create role with ID {0}: {1}".format(roleid, e))
 
     def delete_role(self, roleid):
-        if not self.is_pool_existing(roleid):
+        if not self.is_role_existing(roleid):
             self.module.exit_json(changed=False, roleid=roleid, msg="Role {0} doesn't exist".format(roleid))
 
         if self.module.check_mode:
@@ -176,7 +183,7 @@ def main():
     module_args.update(
         name=dict(type='str', required=True, aliases=['roleid']),
         privileges=dict(type='list', elements='str', aliases=['privs']),
-        append=dict(type='bool', default=False),
+        append=dict(type='bool'),
         state=dict(type='str', default='present', choices=['present', 'absent']),
     )
 
@@ -184,6 +191,7 @@ def main():
         argument_spec=module_args,
         required_one_of=[('api_password', 'api_token_secret')],
         required_together=[('api_token_id', 'api_token_secret')],
+        required_by={'append': 'privileges'},
         supports_check_mode=True,
     )
 
@@ -196,14 +204,14 @@ def main():
 
     if state == "present":
         if proxmox.is_role_existing(roleid):
-            proxmox.create_role(roleid, privs)
-            module.exit_json(changed=True, roleid=roleid, msg="Pool {0} successfully created".format(roleid))
-        else:
             proxmox.update_role(roleid, privs, append)
-            module.exit_json(changed=True, roleid=roleid, msg="Pool {0} successfully updated".format(roleid))
+            module.exit_json(changed=True, roleid=roleid, msg="Role {0} successfully updated".format(roleid))
+        else:
+            proxmox.create_role(roleid, privs)
+            module.exit_json(changed=True, roleid=roleid, msg="Role {0} successfully created".format(roleid))
     else:
         proxmox.delete_role(roleid)
-        module.exit_json(changed=True, roleid=roleid, msg="Pool {0} successfully deleted".format(roleid))
+        module.exit_json(changed=True, roleid=roleid, msg="Role {0} successfully deleted".format(roleid))
 
 
 if __name__ == '__main__':
