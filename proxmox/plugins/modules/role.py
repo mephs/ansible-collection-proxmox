@@ -130,7 +130,7 @@ class ProxmoxRoleModule(ProxmoxModule):
 
     def is_role_existing(self, roleid):
         try:
-            roles = self.proxmox_api.roles.get()
+            roles = self.proxmox_api.access.roles.get()
             for role in roles:
                 if role['roleid'] == roleid:
                     return True
@@ -143,7 +143,7 @@ class ProxmoxRoleModule(ProxmoxModule):
             return
 
         try:
-            self.proxmox_api.roles.post(roleid=roleid, privs=privs)
+            self.proxmox_api.access.roles.post(roleid=roleid, privs=privs)
         except Exception as e:
             self.module.fail_json(msg="Failed to create role with ID {0}: {1}".format(roleid, e))
 
@@ -152,7 +152,7 @@ class ProxmoxRoleModule(ProxmoxModule):
             return
 
         try:
-            self.proxmox_api.roles(roleid).put(privs=privs, append=append)
+            self.proxmox_api.access.roles(roleid).put(privs=privs, append=append)
         except Exception as e:
             self.module.fail_json(msg="Failed to create role with ID {0}: {1}".format(roleid, e))
 
@@ -164,7 +164,7 @@ class ProxmoxRoleModule(ProxmoxModule):
             return
 
         try:
-            self.proxmox_api.roles(roleid).delete()
+            self.proxmox_api.access.roles(roleid).delete()
         except Exception as e:
             self.module.fail_json(msg="Failed to delete role with ID {0}: {1}".format(roleid, e))
 
