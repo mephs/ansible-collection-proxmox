@@ -12,7 +12,7 @@ description: Manage the Proxmox cluster via the Proxmox VE API.
 license:
   - GPL-3.0-or-later
 license_file: LICENSE
-tags: ['proxmox', 'pve']
+tags: ['application', 'proxmox', 'pve']
 repository: https://github.com/rusmephist/ansible-modules
 documentation: https://github.com/rusmephist/ansible-modules/proxmox/README.md
 homepage: https://github.com/rusmephist/ansible-modules/proxmox
