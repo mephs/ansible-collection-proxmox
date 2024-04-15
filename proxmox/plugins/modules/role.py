@@ -122,6 +122,7 @@ RETURN = r'''
 from ansible.module_utils.basic import AnsibleModule
 from ansible_collections.rusmephist.proxmox.plugins.module_utils.proxmox import (
     ProxmoxModule,
+    ansible_to_proxmox_bool,
     proxmox_auth_argument_spec
 )
 
@@ -188,7 +189,7 @@ def main():
 
     roleid = module.params['name']
     privs = module.params['privileges']
-    append = module.params['append']
+    append = ansible_to_proxmox_bool(module.params['append'])
     state = module.params['state']
 
     proxmox = ProxmoxRoleModule(module)
