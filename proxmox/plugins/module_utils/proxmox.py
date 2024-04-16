@@ -87,6 +87,6 @@ class ProxmoxModule(object):
             auth_args['token_value'] = api_token_secret
 
         try:
-            return ProxmoxAPI(api_host, verify_ssl=validate_certs, **auth_args)
+            return ProxmoxAPI(api_host, port=api_port, verify_ssl=validate_certs, **auth_args)
         except Exception as e:
             self.module.fail_json(msg='%s' % e, exception=traceback.format_exc())
