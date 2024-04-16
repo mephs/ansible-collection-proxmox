@@ -13,48 +13,63 @@ class ModuleDocFragment(object):
     # Common parameters for Proxmox VE modules
     DOCUMENTATION = r'''
 options:
-  api_host:
+  pve_host:
     description:
-      - Specify the target host of the Proxmox VE cluster.
+      - Target host of the Proxmox VE cluster.
+      - FQDN or IP Address.
       - You can use E(PROXMOX_HOST) environment variable.
     type: str
     required: true
-    aliases: ['api', 'host']
+    aliases: ['api_host']
 
-  api_user:
+  pve_port:
     description:
-      - Specify the user to authenticate with.
+      - Target port for the connection.
+      - You can use E(PROXMOX_PORT) environment variable.
+    type: str
+    default: 8006
+    aliases: ['api_port']
+
+  pve_user:
+    description:
+      - Specify the user for authentication.
       - You can use E(PROXMOX_USER) environment variable.
     type: str
     required: true
-    aliases: ['user']
+    aliases: ['api_user']
 
-  api_password:
+  pve_password:
     description:
-      - Specify the password to authenticate with.
+      - Specify the password for authentication.
+      - Either this or O(pve_token_id) must be specified.
       - You can use E(PROXMOX_PASSWORD) environment variable.
     type: str
+    aliases: ['api_password']
 
-  api_token_id:
+  pve_token_id:
     description:
       - Specify the token ID.
+      - Either this or O(pve_password) must be specified.
+      - Should be used with O(pve_token_secret).
       - You can use E(PROXMOX_TOKEN) environment variable.
     type: str
-    aliases: ['token_id', 'token']
+    aliases: ['api_token_id', 'token_id']
 
-  api_token_secret:
+  pve_token_secret:
     description:
       - Specify the token secret.
+      - Should be used with O(pve_token_id).
       - You can use E(PROXMOX_SECRET) environment variable.
     type: str
-    aliases: ['token_secret', 'secret']
+    aliases: ['api_token_secret', 'token_secret']
 
-  validate_certs:
+  pve_validate_certs:
     description:
       - If V(false), SSL certificates will not be validated.
       - This should only be used on personally controlled sites using self-signed certificates.
     type: bool
     default: false
+    aliases: ['api_validate_certs', 'validate_certs']
 
 requirements: [ 'proxmoxer >= 1.1.0', 'requests' ]
 '''

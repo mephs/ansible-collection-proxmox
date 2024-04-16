@@ -18,7 +18,7 @@ version_added: 0.0.1
 
 description:
   - Allows to add, modify or remove Proxmox roles via the Proxmox VE API.
-    For more details on permission management see U(https://pve.proxmox.com/wiki/User_Management#pveum_permission_management).
+  - For more details on permission management see U(https://pve.proxmox.com/wiki/User_Management#pveum_permission_management).
 
 attributes:
   check_mode:
@@ -44,7 +44,8 @@ options:
     aliases: ['roleid']
 
   privileges:
-    description: List of Proxmox privileges assign to this role.
+    description:
+      - List of Proxmox privileges assign to this role.
     type: list
     elements: str
     aliases: ['privs']
@@ -67,49 +68,71 @@ EXAMPLES = r'''
   rusmephist.proxmox.role:
     name: empty_role
     state: present
-    api_host: node1
-    api_user: root@pam
-    api_password: Secret123
+    pve_host: node1
+    pve_user: root@pam
+    pve_password: Secret123
 
 - name: Create a role with given privileges
   rusmephist.proxmox.role:
-    name: role1
+    name: new_role
     state: present
     privileges:
       - VM.Backup
       - VM.Clone
       - VM.Snapshot
-    api_host: node1
-    api_user: root@pam
-    api_password: Secret123
+    pve_host: node1
+    pve_user: root@pam
+    pve_password: Secret123
 
 - name: Update a role with given privileges
   rusmephist.proxmox.role:
-    name: role1
+    name: new_role
     state: present
     append: true
     privileges: VM.Snapshot.Rollback
-    api_host: node1
-    api_user: root@pam
-    api_password: Secret123
+    pve_host: node1
+    pve_user: root@pam
+    pve_password: Secret123
 
 - name: Replace privileges in a role
   rusmephist.proxmox.role:
-    name: role1
+    name: new_role
     state: present
+    append: false
     privileges: VM.Config.CPU, VM.Config.Disk, VM.Config.Memory, VM.Config.Network
-    api_host: node1
-    api_user: root@pam
-    api_token_id: token
-    api_token_secret: f22f7c87-b26f-4697-b621-53b91344bf7c
+    pve_host: node1
+    pve_user: root@pam
+    pve_password: Secret123
 
 - name: Remove a role
   rusmephist.proxmox.role:
-    name: role1
+    name: new_role
     state: absent
-    api_host: node1
-    api_user: root@pam
-    api_password: Secret123
+    pve_host: node1
+    pve_user: root@pam
+    pve_password: Secret123
+
+- name: Create a role on a host with a custom port
+  rusmephist.proxmox.role:
+    name: new_role
+    state: present
+    privileges: VM.Backup
+    pve_host: node1
+    pve_port: 35489
+    pve_user: root@pam
+    pve_password: Secret123
+    pve_token_id: token
+    pve_token_secret: f22f7c87-b26f-4697-b621-53b91344bf7c
+
+- name: Create a role using a token
+  rusmephist.proxmox.role:
+    name: new_role
+    state: present
+    privileges: VM.Backup
+    pve_host: node1
+    pve_user: root@pam
+    pve_token_id: token
+    pve_token_secret: f22f7c87-b26f-4697-b621-53b91344bf7c
 '''
 
 RETURN = r'''
@@ -189,8 +212,8 @@ def main():
 
     module = AnsibleModule(
         argument_spec=module_args,
-        required_one_of=[('api_password', 'api_token_secret')],
-        required_together=[('api_token_id', 'api_token_secret')],
+        required_one_of=[('pve_password', 'pve_token_secret')],
+        required_together=[('pve_token_id', 'pve_token_secret')],
         required_by={'append': 'privileges'},
         supports_check_mode=True,
     )
