@@ -38,12 +38,12 @@ def proxmox_auth_argument_spec():
 
 
 def proxmox_to_ansible_bool(value):
-    '''Convert Proxmox representation of a boolean to be ansible-friendly'''
+    """Convert Proxmox representation of a boolean to be ansible-friendly"""
     return True if value == 1 else False
 
 
 def ansible_to_proxmox_bool(value):
-    '''Convert Ansible representation of a boolean to be proxmox-friendly'''
+    """Convert Ansible representation of a boolean to be proxmox-friendly"""
     if value is None:
         return None
 
@@ -90,3 +90,10 @@ class ProxmoxModule(object):
             return ProxmoxAPI(api_host, port=api_port, verify_ssl=validate_certs, **auth_args)
         except Exception as e:
             self.module.fail_json(msg='%s' % e, exception=traceback.format_exc())
+
+    def get_role(self, roleid):
+        try:
+            role = self.proxmox_api.access.roles(roleid).get()
+        except Exception:
+            role = None
+        return role

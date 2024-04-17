@@ -5,8 +5,8 @@
 # GNU General Public License v3.0+ (see COPYING or https://www.gnu.org/licenses/gpl-3.0.txt)
 
 from __future__ import (absolute_import, division, print_function)
-__metaclass__ = type
 
+__metaclass__ = type
 
 DOCUMENTATION = r'''
 ---
@@ -18,7 +18,8 @@ version_added: 0.0.1
 
 description:
   - Allows to add, modify or remove Proxmox roles via the Proxmox VE API.
-  - For more details on permission management see U(https://pve.proxmox.com/wiki/User_Management#pveum_permission_management).
+  - For more details on permission management see
+    U(https://pve.proxmox.com/wiki/User_Management#pveum_permission_management).
 
 attributes:
   check_mode:
@@ -150,58 +151,50 @@ RETURN = r'''
 '''
 
 from ansible.module_utils.basic import AnsibleModule
-from ansible_collections.rusmephist.proxmox.plugins.module_utils.proxmox import (
-    ProxmoxModule,
-    ansible_to_proxmox_bool,
-    proxmox_auth_argument_spec
-)
+from ansible.module_utils.common.text.converters import to_text
+from ansible_collections.rusmephist.proxmox.plugins.module_utils.proxmox import ProxmoxModule
+from ansible_collections.rusmephist.proxmox.plugins.module_utils.proxmox import ansible_to_proxmox_bool
+from ansible_collections.rusmephist.proxmox.plugins.module_utils.proxmox import proxmox_auth_argument_spec
 
 
 class ProxmoxRoleModule(ProxmoxModule):
-
-    def is_role_existing(self, roleid):
-        try:
-            roles = self.proxmox_api.access.roles.get()
-            for role in roles:
-                if role['roleid'] == roleid:
-                    return True
-            return False
-        except Exception as e:
-            self.module.fail_json(msg="Unable to retrieve roles: {0}".format(e))
-
+    
     def create_role(self, roleid, privs):
         if self.module.check_mode:
             return
-
+        
         try:
             self.proxmox_api.access.roles.post(roleid=roleid, privs=privs)
         except Exception as e:
             self.module.fail_json(msg="Failed to create role with ID {0}: {1}".format(roleid, e))
-
+    
     def update_role(self, roleid, privs, append):
         if self.module.check_mode:
             return
-
+        
         try:
             self.proxmox_api.access.roles(roleid).put(privs=privs, append=append)
         except Exception as e:
             self.module.fail_json(msg="Failed to create role with ID {0}: {1}".format(roleid, e))
-
+    
     def delete_role(self, roleid):
-        if not self.is_role_existing(roleid):
-            self.module.exit_json(changed=False, roleid=roleid, msg="Role {0} doesn't exist".format(roleid))
-
+        role = self.get_role(roleid)
+        
+        if role is None:
+            return False
+        
         if self.module.check_mode:
-            return
-
+            return True
+        
         try:
             self.proxmox_api.access.roles(roleid).delete()
         except Exception as e:
-            self.module.fail_json(msg="Failed to delete role with ID {0}: {1}".format(roleid, e))
+            self.module.fail_json(msg=to_text(e))
+        
+        return True
 
 
 def main():
-
     module_args = proxmox_auth_argument_spec()
     module_args.update(
         name=dict(type='str', required=True, aliases=['roleid']),
@@ -209,7 +202,9 @@ def main():
         append=dict(type='bool'),
         state=dict(type='str', default='present', choices=['present', 'absent']),
     )
-
+    
+    result = dict(failed=False, changed=False)
+    
     module = AnsibleModule(
         argument_spec=module_args,
         required_one_of=[('pve_password', 'pve_token_secret')],
@@ -217,24 +212,28 @@ def main():
         required_by={'append': 'privileges'},
         supports_check_mode=True,
     )
-
+    
     roleid = module.params['name']
     privs = module.params['privileges']
     append = ansible_to_proxmox_bool(module.params['append'])
     state = module.params['state']
-
+    
     proxmox = ProxmoxRoleModule(module)
+    
+    if state == "absent":
+        proxmox.delete_role(roleid)
 
-    if state == "present":
-        if proxmox.is_role_existing(roleid):
+    elif state == "present":
+        if proxmox.role_exists(roleid):
             proxmox.update_role(roleid, privs, append)
             module.exit_json(changed=True, roleid=roleid, msg="Role {0} successfully updated".format(roleid))
         else:
             proxmox.create_role(roleid, privs)
             module.exit_json(changed=True, roleid=roleid, msg="Role {0} successfully created".format(roleid))
     else:
-        proxmox.delete_role(roleid)
-        module.exit_json(changed=True, roleid=roleid, msg="Role {0} successfully deleted".format(roleid))
+        raise AssertionError()
+    
+    module.exit_json(**result)
 
 
 if __name__ == '__main__':
