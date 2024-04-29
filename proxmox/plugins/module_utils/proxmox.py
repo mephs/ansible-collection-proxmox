@@ -6,18 +6,20 @@
 # GNU General Public License v3.0+ (see COPYING or https://www.gnu.org/licenses/gpl-3.0.txt)
 
 from __future__ import absolute_import, division, print_function
+
 __metaclass__ = type
+
 from ansible.module_utils.basic import env_fallback, missing_required_lib
+from ansible.module_utils.common.text.converters import to_text
 from ansible.module_utils.compat.version import LooseVersion
 import traceback
 
-
 PROXMOXER_IMP_ERR = None
-
 
 try:
     from proxmoxer import ProxmoxAPI
     from proxmoxer import __version__ as proxmoxer_version
+
     HAS_PROXMOXER = True
 except ImportError:
     HAS_PROXMOXER = False
@@ -29,12 +31,33 @@ def proxmox_auth_argument_spec():
         pve_host=dict(type='str', fallback=(env_fallback, ['PROXMOX_HOST']), required=True, aliases=['api_host']),
         pve_port=dict(type='str', default='8006', fallback=(env_fallback, ['PROXMOX_PORT']), aliases=['api_port']),
         pve_user=dict(type='str', fallback=(env_fallback, ['PROXMOX_USER']), required=True, aliases=['api_user']),
-        pve_password=dict(type='str', fallback=(env_fallback, ['PROXMOX_PASSWORD']), no_log=True, aliases=['api_password']),
-        pve_token_id=dict(type='str', fallback=(env_fallback, ['PROXMOX_TOKEN']), no_log=False, aliases=['api_token_id', 'token_id']),
-        pve_token_secret=dict(type='str', fallback=(env_fallback, ['PROXMOX_SECRET']), no_log=True, aliases=['api_token_secret', 'token_secret']),
+        pve_password=dict(type='str', fallback=(env_fallback, ['PROXMOX_PASSWORD']), no_log=True,
+                          aliases=['api_password']),
+        pve_token_id=dict(type='str', fallback=(env_fallback, ['PROXMOX_TOKEN']), no_log=False,
+                          aliases=['api_token_id', 'token_id']),
+        pve_token_secret=dict(type='str', fallback=(env_fallback, ['PROXMOX_SECRET']), no_log=True,
+                              aliases=['api_token_secret', 'token_secret']),
         pve_validate_certs=dict(type='bool', default=False, aliases=['api_validate_certs', 'validate_certs'])
     )
     return options
+
+
+def proxmox_auth_required_one_of():
+    return [('pve_password', 'pve_token_secret')]
+
+
+def proxmox_auth_required_together():
+    return [('pve_token_id', 'pve_token_secret')]
+
+
+def check_list_match(list1, list2):
+    """Check if all elements in list1 are present in list2"""
+    return all(item in list2 for item in list1)
+
+
+def check_list_equal(list1, list2):
+    """Check if all elements in list1 are equal with elements in list2"""
+    return sorted(list1) == sorted(list2)
 
 
 def proxmox_to_ansible_bool(value):
@@ -55,6 +78,7 @@ def ansible_to_proxmox_bool(value):
 
 class ProxmoxModule(object):
     """Base class for Proxmox modules"""
+
     def __init__(self, module):
         if not HAS_PROXMOXER:
             module.fail_json(msg=missing_required_lib('proxmoxer'), exception=PROXMOXER_IMP_ERR)
@@ -78,6 +102,7 @@ class ProxmoxModule(object):
         validate_certs = self.module.params['pve_validate_certs']
 
         auth_args = {'user': api_user}
+
         if api_password:
             auth_args['password'] = api_password
         else:
@@ -91,9 +116,12 @@ class ProxmoxModule(object):
         except Exception as e:
             self.module.fail_json(msg='%s' % e, exception=traceback.format_exc())
 
-    def get_role(self, roleid):
+    def get_role(self, roleid, ignore_missing=False):
+        """Return Role privileges or Null if Role not existed"""
         try:
-            role = self.proxmox_api.access.roles(roleid).get()
-        except Exception:
-            role = None
-        return role
+            return self.proxmox_api.access.roles(roleid).get()
+        except Exception as e:
+            if ignore_missing:
+                return None
+
+            self.module.fail_json(roleid=roleid, msg=to_text(e))
