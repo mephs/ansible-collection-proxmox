@@ -1,0 +1,156 @@
+---
+- name: Cleanup Proxmox VE Role
+  role:
+    name: ansible_test_role
+    state: absent
+    pve_host: "{{ pve_host }}"
+    pve_port: "{{ pve_port }}"
+    pve_validate_certs: false
+    pve_user: "{{ pve_user }}"
+    pve_password: "{{ pve_password }}"
+
+- name: Create empty Proxmox VE Role
+  role:
+    name: ansible_test_role
+    state: present
+    pve_host: "{{ pve_host }}"
+    pve_port: "{{ pve_port }}"
+    pve_validate_certs: false
+    pve_user: "{{ pve_user }}"
+    pve_password: "{{ pve_password }}"
+  register: proxmox_role_state
+
+- assert:
+    that:
+      - proxmox_role_state is changed
+
+- name: Create empty Proxmox VE Role ( Idempotency test )
+  role:
+    name: ansible_test_role
+    state: present
+    pve_host: "{{ pve_host }}"
+    pve_port: "{{ pve_port }}"
+    pve_validate_certs: false
+    pve_user: "{{ pve_user }}"
+    pve_password: "{{ pve_password }}"
+  register: proxmox_role_state_again
+
+- assert:
+    that:
+      - proxmox_role_state_again is not changed
+
+- name: Cleanup Proxmox VE Role
+  role:
+    name: ansible_test_role
+    state: absent
+    pve_host: "{{ pve_host }}"
+    pve_port: "{{ pve_port }}"
+    pve_validate_certs: false
+    pve_user: "{{ pve_user }}"
+    pve_password: "{{ pve_password }}"
+
+- name: Create Proxmox VE Role with privileges
+  role:
+    name: ansible_test_role
+    state: present
+    privs: VM.Allocate
+    pve_host: "{{ pve_host }}"
+    pve_port: "{{ pve_port }}"
+    pve_validate_certs: false
+    pve_user: "{{ pve_user }}"
+    pve_password: "{{ pve_password }}"
+
+- name: Update Proxmox VE Role with new privileges
+  role:
+    name: ansible_test_role
+    state: present
+    privs:
+      - VM.Config.Memory
+      - VM.Config.CPU
+    append: true
+    pve_host: "{{ pve_host }}"
+    pve_port: "{{ pve_port }}"
+    pve_validate_certs: false
+    pve_user: "{{ pve_user }}"
+    pve_password: "{{ pve_password }}"
+  register: proxmox_role_state_privs_update
+
+- assert:
+    that:
+      - proxmox_role_state_privs_update is changed
+      - proxmox_role_state_privs_update.new_privs | difference(['VM.Allocate', 'VM.Config.CPU', 'VM.Config.Memory']) | length == 0
+
+- name: Update Proxmox VE Role with new privileges ( Idempotency test )
+  role:
+    name: ansible_test_role
+    state: present
+    privs:
+      - VM.Config.Memory
+      - VM.Config.CPU
+    append: true
+    pve_host: "{{ pve_host }}"
+    pve_port: "{{ pve_port }}"
+    pve_validate_certs: false
+    pve_user: "{{ pve_user }}"
+    pve_password: "{{ pve_password }}"
+  register: proxmox_role_state_privs_update_again
+
+- assert:
+    that:
+      - proxmox_role_state_privs_update_again is not changed
+
+- name: Rewrite Proxmox VE Role with new privileges
+  role:
+    name: ansible_test_role
+    state: present
+    privs:
+      - VM.Config.Memory
+      - VM.Config.CPU
+    append: false
+    pve_host: "{{ pve_host }}"
+    pve_port: "{{ pve_port }}"
+    pve_validate_certs: false
+    pve_user: "{{ pve_user }}"
+    pve_password: "{{ pve_password }}"
+  register: proxmox_role_state_privs_rewrite
+
+- assert:
+    that:
+      - proxmox_role_state_privs_rewrite is changed
+      - proxmox_role_state_privs_rewrite.new_privs | difference(['VM.Config.CPU', 'VM.Config.Memory']) | length == 0
+
+- name: Rewrite Proxmox VE Role with new privileges ( Idempotency test )
+  role:
+    name: ansible_test_role
+    state: present
+    privs:
+      - VM.Config.Memory
+      - VM.Config.CPU
+    append: false
+    pve_host: "{{ pve_host }}"
+    pve_port: "{{ pve_port }}"
+    pve_validate_certs: false
+    pve_user: "{{ pve_user }}"
+    pve_password: "{{ pve_password }}"
+  register: proxmox_role_state_privs_rewrite_again
+
+- assert:
+    that:
+      - proxmox_role_state_privs_rewrite_again is not changed
+
+- name: Delete all privileges from Proxmox VE Role
+  role:
+    name: ansible_test_role
+    state: present
+    append: false
+    pve_host: "{{ pve_host }}"
+    pve_port: "{{ pve_port }}"
+    pve_validate_certs: false
+    pve_user: "{{ pve_user }}"
+    pve_password: "{{ pve_password }}"
+  register: proxmox_role_state_delete_privileges
+
+- assert:
+    that:
+      - proxmox_role_state_delete_privileges is changed
+      - proxmox_role_state_delete_privileges.new_privs | length == 0
