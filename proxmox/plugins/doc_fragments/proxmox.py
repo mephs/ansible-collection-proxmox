@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (c) Ansible project
-# Copyright (c) 2024, Mikhail Vorontsov
+# Copyright (c) 2024, Mikhail Vorontsov (@RusMephist) <mvorontsov@tuta.io>
 
 # GNU General Public License v3.0+ (see COPYING or https://www.gnu.org/licenses/gpl-3.0.txt)
 
 from __future__ import (absolute_import, division, print_function)
+
 __metaclass__ = type
 
 
@@ -72,25 +72,4 @@ options:
     aliases: ['api_validate_certs', 'validate_certs']
 
 requirements: [ 'proxmoxer >= 1.1.0', 'requests' ]
-'''
-
-    SELECTION = r'''
-options:
-  vmid:
-    description:
-      - Specifies the instance ID.
-      - If not set the next available ID will be fetched from ProxmoxAPI.
-    type: int
-
-  node:
-    description:
-      - Proxmox VE node on which to operate.
-      - Only required for O(state=present).
-      - For every other states it will be autodiscovered.
-    type: str
-
-  pool:
-    description:
-      - Add the new VM to the specified pool.
-    type: str
 '''

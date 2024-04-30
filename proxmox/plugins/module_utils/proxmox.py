@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 # Copyright (c) 2020, Tristan Le Guern <tleguern at bouledef.eu>
-# Copyright (c) 2024, Mikhail Vorontsov
+# Copyright (c) 2024, Mikhail Vorontsov (@RusMephist) <mvorontsov@tuta.io>
 
 # GNU General Public License v3.0+ (see COPYING or https://www.gnu.org/licenses/gpl-3.0.txt)
 

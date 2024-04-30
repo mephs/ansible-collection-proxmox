@@ -1,7 +1,7 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2024, Mikhail Vorontsov
+# Copyright (c) 2024, Mikhail Vorontsov (@RusMephist) <mvorontsov@tuta.io>
 
 # GNU General Public License v3.0+ (see COPYING or https://www.gnu.org/licenses/gpl-3.0.txt)
 
@@ -13,12 +13,12 @@ DOCUMENTATION = r'''
 ---
 module: role
 
-short_description: Manage Proxmox roles
+short_description: Manage Proxmox VE roles
 
-version_added: 0.0.1
+version_added: 1.0.0
 
 description:
-  - Allows to add, modify or remove Proxmox roles via the Proxmox VE API.
+  - Allows to add, modify or remove Proxmox VE roles.
   - For more details on permission management see
     U(https://pve.proxmox.com/wiki/User_Management#pveum_permission_management).
 
@@ -33,27 +33,31 @@ attributes:
 
 options:
   append:
-    description:
-      - If V(true), add the specified O(privileges) to the role.
-      - If V(false), only specified O(privileges) will be added to the role,
-        removing any other privileges.
+    description: Append defined privileges to existing ones instead of overwriting them.
     type: bool
+    default: false
 
-  name:
-    description: A name of the role.
-    required: true
-    type: str
-    aliases: ['roleid']
-
-  privileges:
+  privs:
     description:
       - List of Proxmox privileges assign to this role.
+      - You can specify multiple privileges by separating them with commas C(VM.Config.CPU,VM.Config.Disk).
+      - All available privileges are listed here
+        U(https://pve.proxmox.com/wiki/User_Management#pveum_permission_management).
     type: list
     elements: str
-    aliases: ['privs']
+    aliases: ['priv']
+
+  roleid:
+    description: Name of the role to manage.
+    required: true
+    type: str
+    aliases: ['name']
 
   state:
-    description: Create or delete a role.
+    description:
+      - If V(present) and the role does not exist, creates it.
+      - If V(present) and the role exists, does nothing or updates its privileges.
+      - If V(absent), removes the role.
     type: str
     choices: ['present', 'absent']
     default: present
@@ -68,7 +72,7 @@ author:
 EXAMPLES = r'''
 - name: Create an empty role
   rusmephist.proxmox.role:
-    name: empty_role
+    roleid: empty_role
     state: present
     pve_host: node1
     pve_user: root@pam
@@ -76,9 +80,9 @@ EXAMPLES = r'''
 
 - name: Create a role with given privileges
   rusmephist.proxmox.role:
-    name: new_role
+    roleid: new_role
     state: present
-    privileges:
+    privs:
       - VM.Backup
       - VM.Clone
       - VM.Snapshot
@@ -86,22 +90,26 @@ EXAMPLES = r'''
     pve_user: root@pam
     pve_password: Secret123
 
-- name: Update a role with given privileges
+- name: Add a privilege to a role
   rusmephist.proxmox.role:
-    name: new_role
+    roleid: new_role
     state: present
+    priv: VM.Snapshot.Rollback
     append: true
-    privileges: VM.Snapshot.Rollback
     pve_host: node1
     pve_user: root@pam
     pve_password: Secret123
 
-- name: Replace privileges in a role
+- name: Overwrite privileges in a role
   rusmephist.proxmox.role:
-    name: new_role
+    roleid: new_role
     state: present
+    privs:
+      - VM.Config.CPU
+      - VM.Config.Disk
+      - VM.Config.Memory
+      - VM.Config.Network
     append: false
-    privileges: VM.Config.CPU, VM.Config.Disk, VM.Config.Memory, VM.Config.Network
     pve_host: node1
     pve_user: root@pam
     pve_password: Secret123
@@ -113,42 +121,32 @@ EXAMPLES = r'''
     pve_host: node1
     pve_user: root@pam
     pve_password: Secret123
-
-- name: Create a role on a host with a custom port
-  rusmephist.proxmox.role:
-    name: new_role
-    state: present
-    privileges: VM.Backup
-    pve_host: node1
-    pve_port: 35489
-    pve_user: root@pam
-    pve_password: Secret123
-    pve_token_id: token
-    pve_token_secret: f22f7c87-b26f-4697-b621-53b91344bf7c
-
-- name: Create a role using a token
-  rusmephist.proxmox.role:
-    name: new_role
-    state: present
-    privileges: VM.Backup
-    pve_host: node1
-    pve_user: root@pam
-    pve_token_id: token
-    pve_token_secret: f22f7c87-b26f-4697-b621-53b91344bf7c
 '''
 
 RETURN = r'''
-# TODO
-# original_message:
-#     description: The original name param that was passed in.
-#     type: str
-#     returned: always
-#     sample: 'hello world'
-# message:
-#     description: The output message that the test module generates.
-#     type: str
-#     returned: always
-#     sample: 'goodbye'
+append:
+    description: Whether or not to append the new privileges.
+    type: bool
+    returned: on update
+privs:
+    description: List of privileges.
+    type: list
+    returned: always
+    sample: ["VM.Config.CPU", "VM.Config.Memory"]
+privs_current:
+    description: List of privileges of role after update.
+    type: list
+    returned: on update
+    sample: ["VM.Allocate", "VM.Config.CPU", "VM.Config.Memory"]
+privs_previous:
+    description: List of privileges of role before update.
+    type: list
+    returned: on update
+    sample: ["VM.Allocate"]
+roleid:
+    description: Name of role.
+    type: str
+    returned: always
 '''
 
 from ansible.module_utils.basic import AnsibleModule
