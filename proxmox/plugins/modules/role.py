@@ -165,8 +165,8 @@ class ProxmoxRoleModule(ProxmoxModule):
 
     def __init__(self, module):
         super().__init__(module)
-        self.roleid = self.module.params.get('name')
-        self.privs = self.module.params.get('privileges')
+        self.roleid = self.module.params.get('roleid')
+        self.privs = self.module.params.get('privs')
         self.append = self.module.params.get('append')
 
     def present_role(self):
@@ -228,8 +228,8 @@ class ProxmoxRoleModule(ProxmoxModule):
 def main():
     argument_spec = proxmox_auth_argument_spec()
     argument_spec.update(
-        name=dict(type='str', required=True, aliases=['roleid']),
-        privileges=dict(type='list', elements='str', default=[], aliases=['privs']),
+        roleid=dict(type='str', required=True, aliases=['name']),
+        privs=dict(type='list', elements='str', default=[], aliases=['priv']),
         append=dict(type='bool', default=False),
         state=dict(type='str', default='present', choices=['present', 'absent']),
     )
