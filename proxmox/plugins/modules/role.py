@@ -53,7 +53,7 @@ options:
     aliases: ['privs']
 
   state:
-    description: Whether the role should be present or absent.
+    description: Create or delete a role.
     type: str
     choices: ['present', 'absent']
     default: present
@@ -157,6 +157,7 @@ from ..module_utils.proxmox import ProxmoxModule
 from ..module_utils.proxmox import ansible_to_proxmox_bool
 from ..module_utils.proxmox import check_list_match
 from ..module_utils.proxmox import check_list_equal
+from ..module_utils.proxmox import list_to_string
 from ..module_utils.proxmox import proxmox_auth_argument_spec
 from ..module_utils.proxmox import proxmox_auth_required_one_of
 from ..module_utils.proxmox import proxmox_auth_required_together
@@ -166,79 +167,71 @@ class ProxmoxRoleModule(ProxmoxModule):
 
     def __init__(self, module):
         super().__init__(module)
+        self.roleid = self.module.params.get('name')
+        self.privs = self.module.params.get('privileges')
+        self.append = self.module.params.get('append')
 
-    def present_role(self, **result):
-        privs = self.module.params.get('privileges')
-        roleid = self.module.params.get('name')
-        append = self.module.params.get('append')
-        role = self.get_role(roleid, ignore_missing=True)
-
-        result['privs'] = privs
+    def present_role(self):
+        role = self.get_role(self.roleid, ignore_missing=True)
 
         if role is None:
-            result = self._create_role(**result)
+            return self._create_role()
+
+        old_privs = list(role.keys())
+        new_privs = self.privs if not self.append else list(set(old_privs + self.privs))
+
+        if self.append:
+            update = not check_list_match(self.privs, old_privs)
         else:
-            if not check_list_match(privs, list(role.keys())):
-                result = self._update_role(**result)
+            update = not check_list_equal(self.privs, old_privs)
 
-            if not check_list_equal(privs, list(role.keys())) and not append:
-                result = self._update_role(**result)
+        if update:
+            return self._update_role(old_privs, new_privs)
 
-        return result
+        return {'changed': False, 'roleid': self.roleid, 'privs': self.privs, 'old_privs': old_privs,
+                'new_privs': new_privs, 'append': self.append}
 
-    def _create_role(self, **result):
-        roleid = self.module.params.get('name')
-        privs = self.module.params.get('privileges')
-
-        result['changed'] = True
-
+    def _create_role(self):
         if not self.module.check_mode:
             try:
-                self.proxmox_api.access.roles.post(roleid=roleid, privs=privs)
+                self.proxmox_api.access.roles.post(roleid=self.roleid, privs=list_to_string(self.privs))
             except Exception as e:
-                result['changed'] = False
-                self.module.fail_json(msg=to_text(e), **result)
+                self.module.fail_json(msg=to_text(e), roleid=self.roleid, privs=self.privs)
 
-        return result
+        return {'changed': True, 'roleid': self.roleid, 'privs': self.privs}
 
-    def _update_role(self, **result):
-        roleid = self.module.params.get('name')
-        privs = self.module.params.get('privileges')
-        append = self.module.params.get('append')
-
-        result['append'] = append
-        result['changed'] = True
-
+    def _update_role(self, old_privs, new_privs):
         if not self.module.check_mode:
             try:
-                self.proxmox_api.access.roles(roleid).put(privs=privs, append=ansible_to_proxmox_bool(append))
+                self.proxmox_api.access.roles(self.roleid).put(privs=list_to_string(self.privs),
+                                                               append=ansible_to_proxmox_bool(self.append))
             except Exception as e:
-                result['changed'] = False
-                self.module.fail_json(msg=to_text(e), **result)
+                self.module.fail_json(msg=to_text(e), roleid=self.roleid, privs=self.privs, old_privs=old_privs,
+                                      new_privs=new_privs, append=self.append)
 
-        return result
+        return {'changed': True, 'roleid': self.roleid, 'privs': self.privs, 'old_privs': old_privs,
+                'new_privs': new_privs, 'append': self.append}
 
-    def absent_role(self, **result):
-        roleid = self.module.params.get('name')
-        role = self.get_role(roleid, ignore_missing=True)
+    def absent_role(self):
+        role = self.get_role(self.roleid, ignore_missing=True)
 
         if role is not None:
-            result['changed'] = True
-
             if not self.module.check_mode:
                 try:
-                    self.proxmox_api.access.roles(roleid).delete()
+                    self.proxmox_api.access.roles(self.roleid).delete()
                 except Exception as e:
-                    self.module.fail_json(msg=to_text(e), **result)
+                    self.module.fail_json(msg=to_text(e), roleid=self.roleid)
 
-        return result
+            return {'changed': True, 'roleid': self.roleid}
+
+        return {'changed': False, 'roleid': self.roleid}
 
 
 def main():
     argument_spec = proxmox_auth_argument_spec()
     argument_spec.update(
         name=dict(type='str', required=True, aliases=['roleid']),
-        privileges=dict(type='list', elements='str', aliases=['privs']),
+        privileges=dict(type='list', elements='str', default=[], aliases=['privs']),
         append=dict(type='bool', default=False),
         state=dict(type='str', default='present', choices=['present', 'absent']),
     )
@@ -250,19 +243,13 @@ def main():
         supports_check_mode=True,
     )
 
-    result = {
-        'changed': False,
-        'roleid': module.params.get('name'),
-        'state': module.params.get('state')
-    }
-
     proxmox = ProxmoxRoleModule(module)
     state = module.params.get('state')
 
     if state == "absent":
-        result = proxmox.absent_role(**result)
+        result = proxmox.absent_role()
     else:
-        result = proxmox.present_role(**result)
+        result = proxmox.present_role()
 
     module.exit_json(**result)
 
