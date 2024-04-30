@@ -1,0 +1,14 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+Vagrant.configure("2") do |config|
+  config.vm.box = "castor/proxmox"
+  config.vm.network "forwarded_port", guest: 8006, host: 8006
+  config.vm.synced_folder '.', '/vagrant', disabled: true
+
+  config.vm.provider "libvirt" do |libvirt|
+    libvirt.memory = 4096
+    libvirt.cpus = 2
+    libvirt.nested = true
+  end
+end
