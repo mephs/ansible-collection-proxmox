@@ -189,7 +189,7 @@ class ProxmoxRoleModule(ProxmoxModule):
             return self._update_role(old_privs, new_privs)
 
         return {'changed': False, 'roleid': self.roleid, 'privs': self.privs, 'old_privs': old_privs,
-                'new_privs': new_privs, 'append': self.append}
+                'new_privs': new_privs, 'append': self.append, 'msg': "role %s not changed" % self.roleid}
 
     def _create_role(self):
         if not self.module.check_mode:
@@ -198,7 +198,7 @@ class ProxmoxRoleModule(ProxmoxModule):
             except Exception as e:
                 self.module.fail_json(msg=to_text(e), roleid=self.roleid, privs=self.privs)
 
-        return {'changed': True, 'roleid': self.roleid, 'privs': self.privs}
+        return {'changed': True, 'roleid': self.roleid, 'privs': self.privs, 'msg': "role %s created" % self.roleid}
 
     def _update_role(self, old_privs, new_privs):
         if not self.module.check_mode:
@@ -210,7 +210,7 @@ class ProxmoxRoleModule(ProxmoxModule):
                                       new_privs=new_privs, append=self.append)
 
         return {'changed': True, 'roleid': self.roleid, 'privs': self.privs, 'old_privs': old_privs,
-                'new_privs': new_privs, 'append': self.append}
+                'new_privs': new_privs, 'append': self.append, 'msg': "role %s updated" % self.roleid}
 
     def absent_role(self):
         role = self.get_role(self.roleid, ignore_missing=True)
@@ -222,9 +222,9 @@ class ProxmoxRoleModule(ProxmoxModule):
                 except Exception as e:
                     self.module.fail_json(msg=to_text(e), roleid=self.roleid)
 
-            return {'changed': True, 'roleid': self.roleid}
+            return {'changed': True, 'roleid': self.roleid, 'msg': "role %s deleted" % self.roleid}
 
-        return {'changed': False, 'roleid': self.roleid}
+        return {'changed': False, 'roleid': self.roleid, 'msg': "role %s not found" % self.roleid}
 
 
 def main():
