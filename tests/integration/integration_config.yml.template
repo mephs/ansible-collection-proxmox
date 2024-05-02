@@ -1,0 +1,5 @@
+---
+pve_host: localhost
+pve_port: 8006
+pve_user: root@pam
+pve_password: SecretPass

@@ -1,0 +1,5 @@
+output/
+integration/inventory
+integration/integration_config.yml
+
+.vagrant/
