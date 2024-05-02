@@ -1,14 +1,15 @@
 ---
-# Copyright (c) 2024, Mikhail Vorontsov
+# Copyright (c) 2024, Mikhail Vorontsov (@mephs) <mvorontsov@tuta.io>
+
 # GNU General Public License v3.0+ (see COPYING or https://www.gnu.org/licenses/gpl-3.0.txt)
 
-namespace: rusmephist
+namespace: mephs
 name: proxmox
 version: 1.0.0
 readme: README.md
 authors:
-  - Mikhail Vorontsov (mikevoroncov@gmail.com)
-description: Manage the Proxmox cluster via the Proxmox VE API.
+  - Mikhail Vorontsov (mvorontsov@tuta.io)
+description: Managing the Proxmox VE cluster via the Proxmox VE API.
 license:
   - GPL-3.0-or-later
 license_file: LICENSE
