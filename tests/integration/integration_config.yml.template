@@ -1,5 +1,5 @@
 ---
-pve_host: localhost
-pve_port: 8006
-pve_user: root@pam
-pve_password: SecretPass
+api_host: localhost
+api_port: 8006
+api_user: root@pam
+api_password: SecretPass

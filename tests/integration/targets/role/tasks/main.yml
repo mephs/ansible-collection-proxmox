@@ -3,21 +3,21 @@
   role:
     name: ansible_test_role
     state: absent
-    pve_host: "{{ pve_host }}"
-    pve_port: "{{ pve_port }}"
-    pve_validate_certs: false
-    pve_user: "{{ pve_user }}"
-    pve_password: "{{ pve_password }}"
+    api_host: "{{ api_host }}"
+    api_port: "{{ api_port }}"
+    api_validate_certs: false
+    api_user: "{{ api_user }}"
+    api_password: "{{ api_password }}"
 
 - name: Create empty Proxmox VE Role
   role:
     name: ansible_test_role
     state: present
-    pve_host: "{{ pve_host }}"
-    pve_port: "{{ pve_port }}"
-    pve_validate_certs: false
-    pve_user: "{{ pve_user }}"
-    pve_password: "{{ pve_password }}"
+    api_host: "{{ api_host }}"
+    api_port: "{{ api_port }}"
+    api_validate_certs: false
+    api_user: "{{ api_user }}"
+    api_password: "{{ api_password }}"
   register: proxmox_role_state
 
 - assert:
@@ -28,11 +28,11 @@
   role:
     name: ansible_test_role
     state: present
-    pve_host: "{{ pve_host }}"
-    pve_port: "{{ pve_port }}"
-    pve_validate_certs: false
-    pve_user: "{{ pve_user }}"
-    pve_password: "{{ pve_password }}"
+    api_host: "{{ api_host }}"
+    api_port: "{{ api_port }}"
+    api_validate_certs: false
+    api_user: "{{ api_user }}"
+    api_password: "{{ api_password }}"
   register: proxmox_role_state_again
 
 - assert:
@@ -43,22 +43,22 @@
   role:
     name: ansible_test_role
     state: absent
-    pve_host: "{{ pve_host }}"
-    pve_port: "{{ pve_port }}"
-    pve_validate_certs: false
-    pve_user: "{{ pve_user }}"
-    pve_password: "{{ pve_password }}"
+    api_host: "{{ api_host }}"
+    api_port: "{{ api_port }}"
+    api_validate_certs: false
+    api_user: "{{ api_user }}"
+    api_password: "{{ api_password }}"
 
 - name: Create Proxmox VE Role with privileges
   role:
     name: ansible_test_role
     state: present
     privs: VM.Allocate
-    pve_host: "{{ pve_host }}"
-    pve_port: "{{ pve_port }}"
-    pve_validate_certs: false
-    pve_user: "{{ pve_user }}"
-    pve_password: "{{ pve_password }}"
+    api_host: "{{ api_host }}"
+    api_port: "{{ api_port }}"
+    api_validate_certs: false
+    api_user: "{{ api_user }}"
+    api_password: "{{ api_password }}"
 
 - name: Update Proxmox VE Role with new privileges
   role:
@@ -68,11 +68,11 @@
       - VM.Config.Memory
       - VM.Config.CPU
     append: true
-    pve_host: "{{ pve_host }}"
-    pve_port: "{{ pve_port }}"
-    pve_validate_certs: false
-    pve_user: "{{ pve_user }}"
-    pve_password: "{{ pve_password }}"
+    api_host: "{{ api_host }}"
+    api_port: "{{ api_port }}"
+    api_validate_certs: false
+    api_user: "{{ api_user }}"
+    api_password: "{{ api_password }}"
   register: proxmox_role_state_privs_update
 
 - assert:
@@ -88,11 +88,11 @@
       - VM.Config.Memory
       - VM.Config.CPU
     append: true
-    pve_host: "{{ pve_host }}"
-    pve_port: "{{ pve_port }}"
-    pve_validate_certs: false
-    pve_user: "{{ pve_user }}"
-    pve_password: "{{ pve_password }}"
+    api_host: "{{ api_host }}"
+    api_port: "{{ api_port }}"
+    api_validate_certs: false
+    api_user: "{{ api_user }}"
+    api_password: "{{ api_password }}"
   register: proxmox_role_state_privs_update_again
 
 - assert:
@@ -107,11 +107,11 @@
       - VM.Config.Memory
       - VM.Config.CPU
     append: false
-    pve_host: "{{ pve_host }}"
-    pve_port: "{{ pve_port }}"
-    pve_validate_certs: false
-    pve_user: "{{ pve_user }}"
-    pve_password: "{{ pve_password }}"
+    api_host: "{{ api_host }}"
+    api_port: "{{ api_port }}"
+    api_validate_certs: false
+    api_user: "{{ api_user }}"
+    api_password: "{{ api_password }}"
   register: proxmox_role_state_privs_rewrite
 
 - assert:
@@ -127,11 +127,11 @@
       - VM.Config.Memory
       - VM.Config.CPU
     append: false
-    pve_host: "{{ pve_host }}"
-    pve_port: "{{ pve_port }}"
-    pve_validate_certs: false
-    pve_user: "{{ pve_user }}"
-    pve_password: "{{ pve_password }}"
+    api_host: "{{ api_host }}"
+    api_port: "{{ api_port }}"
+    api_validate_certs: false
+    api_user: "{{ api_user }}"
+    api_password: "{{ api_password }}"
   register: proxmox_role_state_privs_rewrite_again
 
 - assert:
@@ -143,11 +143,11 @@
     name: ansible_test_role
     state: present
     append: false
-    pve_host: "{{ pve_host }}"
-    pve_port: "{{ pve_port }}"
-    pve_validate_certs: false
-    pve_user: "{{ pve_user }}"
-    pve_password: "{{ pve_password }}"
+    api_host: "{{ api_host }}"
+    api_port: "{{ api_port }}"
+    api_validate_certs: false
+    api_user: "{{ api_user }}"
+    api_password: "{{ api_password }}"
   register: proxmox_role_state_delete_privileges
 
 - assert:

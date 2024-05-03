@@ -63,7 +63,7 @@ options:
     default: present
 
 extends_documentation_fragment:
-  - mephs.proxmox.proxmox.documentation
+  - mephs.proxmox.api_auth
 
 author:
   - Mikhail Vorontsov (@mephs)
@@ -74,9 +74,9 @@ EXAMPLES = r'''
   mephs.proxmox.role:
     roleid: empty_role
     state: present
-    pve_host: node1
-    pve_user: root@pam
-    pve_password: Secret123
+    api_host: node1
+    api_user: root@pam
+    api_password: Secret123
 
 - name: Create a role with given privileges
   mephs.proxmox.role:
@@ -86,9 +86,9 @@ EXAMPLES = r'''
       - VM.Backup
       - VM.Clone
       - VM.Snapshot
-    pve_host: node1
-    pve_user: root@pam
-    pve_password: Secret123
+    api_host: node1
+    api_user: root@pam
+    api_password: Secret123
 
 - name: Add a privilege to a role
   mephs.proxmox.role:
@@ -96,9 +96,9 @@ EXAMPLES = r'''
     state: present
     priv: VM.Snapshot.Rollback
     append: true
-    pve_host: node1
-    pve_user: root@pam
-    pve_password: Secret123
+    api_host: node1
+    api_user: root@pam
+    api_password: Secret123
 
 - name: Overwrite privileges in a role
   mephs.proxmox.role:
@@ -110,17 +110,17 @@ EXAMPLES = r'''
       - VM.Config.Memory
       - VM.Config.Network
     append: false
-    pve_host: node1
-    pve_user: root@pam
-    pve_password: Secret123
+    api_host: node1
+    api_user: root@pam
+    api_password: Secret123
 
 - name: Remove a role
   mephs.proxmox.role:
     name: new_role
     state: absent
-    pve_host: node1
-    pve_user: root@pam
-    pve_password: Secret123
+    api_host: node1
+    api_user: root@pam
+    api_password: Secret123
 '''
 
 RETURN = r'''
@@ -156,9 +156,9 @@ from ..module_utils.proxmox import ansible_to_proxmox_bool
 from ..module_utils.proxmox import check_list_match
 from ..module_utils.proxmox import check_list_equal
 from ..module_utils.proxmox import list_to_string
-from ..module_utils.proxmox import proxmox_auth_argument_spec
 from ..module_utils.proxmox import proxmox_auth_required_one_of
 from ..module_utils.proxmox import proxmox_auth_required_together
+from ..module_utils.common_args import proxmox_auth_argument_spec
 
 
 class ProxmoxRoleModule(ProxmoxModule):

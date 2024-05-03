@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2020, Tristan Le Guern <tleguern at bouledef.eu>
 # Copyright (c) 2024, Mikhail Vorontsov (@mephs) <mvorontsov@tuta.io>
 
 # GNU General Public License v3.0+ (see COPYING or https://www.gnu.org/licenses/gpl-3.0.txt)
@@ -9,7 +8,7 @@ from __future__ import absolute_import, division, print_function
 
 __metaclass__ = type
 
-from ansible.module_utils.basic import env_fallback, missing_required_lib
+from ansible.module_utils.basic import missing_required_lib
 from ansible.module_utils.common.text.converters import to_text
 from ansible.module_utils.compat.version import LooseVersion
 import traceback
@@ -24,22 +23,6 @@ try:
 except ImportError:
     HAS_PROXMOXER = False
     PROXMOXER_IMP_ERR = traceback.format_exc()
-
-
-def proxmox_auth_argument_spec():
-    options = dict(
-        pve_host=dict(type='str', fallback=(env_fallback, ['PROXMOX_HOST']), required=True, aliases=['api_host']),
-        pve_port=dict(type='str', default='8006', fallback=(env_fallback, ['PROXMOX_PORT']), aliases=['api_port']),
-        pve_user=dict(type='str', fallback=(env_fallback, ['PROXMOX_USER']), required=True, aliases=['api_user']),
-        pve_password=dict(type='str', fallback=(env_fallback, ['PROXMOX_PASSWORD']), no_log=True,
-                          aliases=['api_password']),
-        pve_token_id=dict(type='str', fallback=(env_fallback, ['PROXMOX_TOKEN']), no_log=False,
-                          aliases=['api_token_id', 'token_id']),
-        pve_token_secret=dict(type='str', fallback=(env_fallback, ['PROXMOX_SECRET']), no_log=True,
-                              aliases=['api_token_secret', 'token_secret']),
-        pve_validate_certs=dict(type='bool', default=False, aliases=['api_validate_certs', 'validate_certs'])
-    )
-    return options
 
 
 def proxmox_auth_required_one_of():
