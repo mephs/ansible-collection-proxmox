@@ -14,7 +14,7 @@ license:
   - GPL-3.0-or-later
 license_file: LICENSE
 tags: ['application', 'proxmox', 'pve']
-repository: https://github.com/rusmephist/ansible-modules
-documentation: https://github.com/rusmephist/ansible-modules/proxmox/README.md
-homepage: https://github.com/rusmephist/ansible-modules/proxmox
-issues: https://github.com/RusMephist/ansible-modules/issues
+repository: https://github.com/mephs/ansible-modules
+documentation: https://github.com/mephs/ansible-modules/proxmox/README.md
+homepage: https://github.com/mephs/ansible-modules/proxmox
+issues: https://github.com/mephs/ansible-modules/issues

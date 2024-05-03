@@ -63,15 +63,15 @@ options:
     default: present
 
 extends_documentation_fragment:
-  - rusmephist.proxmox.proxmox.documentation
+  - mephs.proxmox.proxmox.documentation
 
 author:
-  - Mikhail Vorontsov (@RusMephist)
+  - Mikhail Vorontsov (@mephs)
 '''
 
 EXAMPLES = r'''
 - name: Create an empty role
-  rusmephist.proxmox.role:
+  mephs.proxmox.role:
     roleid: empty_role
     state: present
     pve_host: node1
@@ -79,7 +79,7 @@ EXAMPLES = r'''
     pve_password: Secret123
 
 - name: Create a role with given privileges
-  rusmephist.proxmox.role:
+  mephs.proxmox.role:
     roleid: new_role
     state: present
     privs:
@@ -91,7 +91,7 @@ EXAMPLES = r'''
     pve_password: Secret123
 
 - name: Add a privilege to a role
-  rusmephist.proxmox.role:
+  mephs.proxmox.role:
     roleid: new_role
     state: present
     priv: VM.Snapshot.Rollback
@@ -101,7 +101,7 @@ EXAMPLES = r'''
     pve_password: Secret123
 
 - name: Overwrite privileges in a role
-  rusmephist.proxmox.role:
+  mephs.proxmox.role:
     roleid: new_role
     state: present
     privs:
@@ -115,7 +115,7 @@ EXAMPLES = r'''
     pve_password: Secret123
 
 - name: Remove a role
-  rusmephist.proxmox.role:
+  mephs.proxmox.role:
     name: new_role
     state: absent
     pve_host: node1
