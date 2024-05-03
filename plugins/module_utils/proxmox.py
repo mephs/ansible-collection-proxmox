@@ -26,14 +26,6 @@ except ImportError:
     PROXMOXER_IMP_ERR = traceback.format_exc()
 
 
-def proxmox_auth_required_one_of():
-    return [('pve_password', 'pve_token_secret')]
-
-
-def proxmox_auth_required_together():
-    return [('pve_token_id', 'pve_token_secret')]
-
-
 def check_list_match(list1, list2):
     """Check if all elements in list1 are present in list2"""
     return all(item in list2 for item in list1)
