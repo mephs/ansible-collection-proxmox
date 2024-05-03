@@ -63,7 +63,7 @@ options:
     default: present
 
 extends_documentation_fragment:
-  - mephs.proxmox.proxmox.documentation
+  - mephs.proxmox.api_auth
 
 author:
   - Mikhail Vorontsov (@mephs)
