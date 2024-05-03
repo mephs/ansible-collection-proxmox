@@ -28,16 +28,15 @@ except ImportError:
 
 def proxmox_auth_argument_spec():
     options = dict(
-        pve_host=dict(type='str', fallback=(env_fallback, ['PROXMOX_HOST']), required=True, aliases=['api_host']),
-        pve_port=dict(type='str', default='8006', fallback=(env_fallback, ['PROXMOX_PORT']), aliases=['api_port']),
-        pve_user=dict(type='str', fallback=(env_fallback, ['PROXMOX_USER']), required=True, aliases=['api_user']),
-        pve_password=dict(type='str', fallback=(env_fallback, ['PROXMOX_PASSWORD']), no_log=True,
-                          aliases=['api_password']),
-        pve_token_id=dict(type='str', fallback=(env_fallback, ['PROXMOX_TOKEN']), no_log=False,
-                          aliases=['api_token_id', 'token_id']),
-        pve_token_secret=dict(type='str', fallback=(env_fallback, ['PROXMOX_SECRET']), no_log=True,
-                              aliases=['api_token_secret', 'token_secret']),
-        pve_validate_certs=dict(type='bool', default=False, aliases=['api_validate_certs', 'validate_certs'])
+        api_host=dict(type='str', fallback=(env_fallback, ['PROXMOX_HOST']), required=True),
+        api_port=dict(type='str', default='8006', fallback=(env_fallback, ['PROXMOX_PORT'])),
+        api_user=dict(type='str', fallback=(env_fallback, ['PROXMOX_USER']), required=True),
+        api_password=dict(type='str', fallback=(env_fallback, ['PROXMOX_PASSWORD']), no_log=True),
+        api_token_id=dict(type='str', fallback=(env_fallback, ['PROXMOX_TOKEN']), no_log=False,
+                          aliases=['token_id']),
+        api_token_secret=dict(type='str', fallback=(env_fallback, ['PROXMOX_SECRET']), no_log=True,
+                              aliases=['token_secret']),
+        api_validate_certs=dict(type='bool', default=False, aliases=['validate_certs'])
     )
     return options
 

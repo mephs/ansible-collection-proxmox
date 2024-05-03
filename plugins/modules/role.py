@@ -74,9 +74,9 @@ EXAMPLES = r'''
   mephs.proxmox.role:
     roleid: empty_role
     state: present
-    pve_host: node1
-    pve_user: root@pam
-    pve_password: Secret123
+    api_host: node1
+    api_user: root@pam
+    api_password: Secret123
 
 - name: Create a role with given privileges
   mephs.proxmox.role:
@@ -86,9 +86,9 @@ EXAMPLES = r'''
       - VM.Backup
       - VM.Clone
       - VM.Snapshot
-    pve_host: node1
-    pve_user: root@pam
-    pve_password: Secret123
+    api_host: node1
+    api_user: root@pam
+    api_password: Secret123
 
 - name: Add a privilege to a role
   mephs.proxmox.role:
@@ -96,9 +96,9 @@ EXAMPLES = r'''
     state: present
     priv: VM.Snapshot.Rollback
     append: true
-    pve_host: node1
-    pve_user: root@pam
-    pve_password: Secret123
+    api_host: node1
+    api_user: root@pam
+    api_password: Secret123
 
 - name: Overwrite privileges in a role
   mephs.proxmox.role:
@@ -110,17 +110,17 @@ EXAMPLES = r'''
       - VM.Config.Memory
       - VM.Config.Network
     append: false
-    pve_host: node1
-    pve_user: root@pam
-    pve_password: Secret123
+    api_host: node1
+    api_user: root@pam
+    api_password: Secret123
 
 - name: Remove a role
   mephs.proxmox.role:
     name: new_role
     state: absent
-    pve_host: node1
-    pve_user: root@pam
-    pve_password: Secret123
+    api_host: node1
+    api_user: root@pam
+    api_password: Secret123
 '''
 
 RETURN = r'''
