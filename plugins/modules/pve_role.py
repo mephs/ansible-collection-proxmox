@@ -36,11 +36,11 @@ options:
     type: list
     elements: str
     aliases: ['priv']
-  roleid:
+  name:
     description: Name of the role to manage.
     required: true
     type: str
-    aliases: ['name']
+    aliases: ['roleid']
   state:
     description:
       - If V(present) and the role does not exist, creates it.
@@ -59,7 +59,7 @@ author:
 EXAMPLES = r'''
 - name: Create an empty role
   mephs.proxmox.pve_role:
-    roleid: empty_role
+    name: empty_role
     state: present
     api_host: node1
     api_user: root@pam
@@ -67,7 +67,7 @@ EXAMPLES = r'''
 
 - name: Create a role with given privileges
   mephs.proxmox.pve_role:
-    roleid: new_role
+    name: new_role
     state: present
     privs:
       - VM.Backup
@@ -79,7 +79,7 @@ EXAMPLES = r'''
 
 - name: Add a privilege to a role
   mephs.proxmox.pve_role:
-    roleid: new_role
+    name: new_role
     state: present
     priv: VM.Snapshot.Rollback
     append: true
@@ -89,7 +89,7 @@ EXAMPLES = r'''
 
 - name: Overwrite privileges in a role
   mephs.proxmox.pve_role:
-    roleid: new_role
+    name: new_role
     state: present
     privs:
       - VM.Config.CPU
@@ -152,7 +152,7 @@ class ProxmoxRoleModule(ProxmoxModule):
 
     def __init__(self, module):
         super().__init__(module)
-        self.roleid = self.module.params.get('roleid')
+        self.roleid = self.module.params.get('name')
         self.privs = self.module.params.get('privs')
         self.append = self.module.params.get('append')
 
@@ -224,7 +224,7 @@ class ProxmoxRoleModule(ProxmoxModule):
 def main():
     argument_spec = proxmox_auth_argument_spec()
     argument_spec.update(
-        roleid=dict(type='str', required=True, aliases=['name']),
+        name=dict(type='str', required=True, aliases=['roleid']),
         privs=dict(type='list', elements='str', default=[], aliases=['priv']),
         append=dict(type='bool', default=False),
         state=dict(type='str', default='present', choices=['present', 'absent']),
