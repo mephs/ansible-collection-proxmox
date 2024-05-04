@@ -156,6 +156,15 @@ class ProxmoxRoleModule(ProxmoxModule):
         self.privs = self.module.params.get('privs')
         self.append = self.module.params.get('append')
 
+    def get_role(self, roleid, ignore_missing=False):
+        try:
+            return self.proxmox_api.access.roles.get(roleid)
+        except Exception as e:
+            if ignore_missing:
+                return None
+
+            self.module.fail_json(roleid=roleid, msg=to_text(e))
+
     def present_role(self):
         role = self.get_role(self.roleid, ignore_missing=True)
 
