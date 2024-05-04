@@ -148,7 +148,7 @@ from ..module_utils.common_args import proxmox_auth_required_one_of
 from ..module_utils.common_args import proxmox_auth_required_together
 
 
-class ProxmoxRoleModule(ProxmoxModule):
+class PVERoleModule(ProxmoxModule):
 
     def __init__(self, module):
         super().__init__(module)
@@ -237,7 +237,7 @@ def main():
         supports_check_mode=True,
     )
 
-    proxmox = ProxmoxRoleModule(module)
+    proxmox = PVERoleModule(module)
     state = module.params.get('state')
 
     if state == "absent":
