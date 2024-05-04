@@ -85,7 +85,7 @@ class PVERoleInfoModule(ProxmoxModule):
     def get_role(self, roleid):
         try:
             privs = self.proxmox_api.access.roles.get(roleid)
-            return {'roles': [{'name': roleid, 'privs': privs.keys()}]}
+            return {'roles': [{'roleid': roleid, 'privs': privs.keys()}]}
         except Exception as e:
             self.module.fail_json(roleid=roleid, msg=to_text(e))
 
