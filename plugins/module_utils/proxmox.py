@@ -37,8 +37,13 @@ def check_list_equal(list1, list2):
 
 
 def list_to_string(lst, sep=','):
-    """Converts a list of elements into a single string"""
+    """Convert a list of elements into a single string"""
     return sep.join(lst) if lst else ''
+
+
+def string_to_list(string, sep=','):
+    """Convert a string to a list"""
+    return list(string.split(sep)) if string else list()
 
 
 def proxmox_to_ansible_bool(value):
@@ -96,13 +101,3 @@ class ProxmoxModule(object):
             return ProxmoxAPI(api_host, port=api_port, verify_ssl=validate_certs, **auth_args)
         except Exception as e:
             self.module.fail_json(msg='%s' % e, exception=traceback.format_exc())
-
-    def get_role(self, roleid, ignore_missing=False):
-        """Return Role privileges or None if Role not existed"""
-        try:
-            return self.proxmox_api.access.roles(roleid).get()
-        except Exception as e:
-            if ignore_missing:
-                return None
-
-            self.module.fail_json(roleid=roleid, msg=to_text(e))

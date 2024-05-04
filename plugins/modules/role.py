@@ -12,31 +12,21 @@ __metaclass__ = type
 DOCUMENTATION = r'''
 ---
 module: role
-
 short_description: Manage Proxmox VE roles
-
-version_added: 1.0.0
-
 description:
   - Allows to add, modify or remove Proxmox VE roles.
   - For more details on permission management see
     U(https://pve.proxmox.com/wiki/User_Management#pveum_permission_management).
-
 attributes:
   check_mode:
     support: full
-    description: Can run in check_mode and return changed status prediction without modifying target
-
   diff_mode:
     support: none
-    description: Will return details on what has changed (or possibly needs changing in check_mode), when in diff mode
-
 options:
   append:
     description: Append defined privileges to existing ones instead of overwriting them.
     type: bool
     default: false
-
   privs:
     description:
       - List of Proxmox privileges assign to this role.
@@ -46,13 +36,11 @@ options:
     type: list
     elements: str
     aliases: ['priv']
-
   roleid:
     description: Name of the role to manage.
     required: true
     type: str
     aliases: ['name']
-
   state:
     description:
       - If V(present) and the role does not exist, creates it.
@@ -61,10 +49,9 @@ options:
     type: str
     choices: ['present', 'absent']
     default: present
-
 extends_documentation_fragment:
   - mephs.proxmox.api_auth
-
+  - mephs.proxmox.attributes
 author:
   - Mikhail Vorontsov (@mephs)
 '''
@@ -168,6 +155,15 @@ class ProxmoxRoleModule(ProxmoxModule):
         self.roleid = self.module.params.get('roleid')
         self.privs = self.module.params.get('privs')
         self.append = self.module.params.get('append')
+
+    def get_role(self, roleid, ignore_missing=False):
+        try:
+            return self.proxmox_api.access.roles.get(roleid)
+        except Exception as e:
+            if ignore_missing:
+                return None
+
+            self.module.fail_json(roleid=roleid, msg=to_text(e))
 
     def present_role(self):
         role = self.get_role(self.roleid, ignore_missing=True)
