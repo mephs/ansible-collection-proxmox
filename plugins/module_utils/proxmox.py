@@ -46,16 +46,6 @@ def string_to_list(string, sep=','):
     return list(string.split(sep)) if string else list()
 
 
-def remap_dictionary(dictionary, map_dict):
-    """
-    Remap dictionary keys from a certain set of keys to a new set of keys
-    :param dictionary: the dictionary that needs to be remapped
-    :param map_dict: a dictionary mapping of keys in the original dictionary to the output dictionary
-    :return: the output dictionary with keys remapped, will return None if method is not recognized
-    """
-    return {map_dict.get(key, key): value for key, value in dictionary.items()}
-
-
 def proxmox_to_ansible_bool(value):
     """Convert Proxmox representation of a boolean to be ansible-friendly"""
     return True if value == 1 else False

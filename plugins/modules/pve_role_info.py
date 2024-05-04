@@ -12,13 +12,12 @@ __metaclass__ = type
 DOCUMENTATION = r'''
 ---
 module: pve_role_info
-short_description: 
+short_description: Retrieve information about Proxmox VE roles
 description:
-  - 
+  - Retrieve information about Proxmox VE roles.
 options:
   name:
-    description: Name of the role to manage.
-    required: true
+    description: Name of the role to be retrieved.
     type: str
     aliases: ['roleid']
 extends_documentation_fragment:
@@ -30,20 +29,42 @@ author:
 '''
 
 EXAMPLES = r'''
-- name: Create an empty role
+- name: Get all proxmox roles
   mephs.proxmox.pve_role_info:
-    roleid: empty_role
-    state: present
     api_host: node1
     api_user: root@pam
     api_password: Secret123
+  register: _proxmox_roles
+  
+- name: Get the role details
+  mephs.proxmox.pve_role_info:
+    name: custom_role
+    api_host: node1
+    api_user: root@pam
+    api_password: Secret123
+  register: _custom_role_details
 '''
 
 RETURN = r'''
-name:
-    description: Name of role.
-    type: str
+roles:
+    description: List of roles.
+    type: list
+    elements: dict
     returned: always
+    contains:
+      privs:
+        description: List of privileges on the role.
+        type: list
+        elements: str
+        returned: on success
+      roleid:
+        description: Role name.
+        returned: on success
+        type: str
+      special:
+        description: Predefined role flag.
+        returned: on success, if O(name) is not specified
+        type: bool
 '''
 
 from ansible.module_utils.basic import AnsibleModule
@@ -51,7 +72,6 @@ from ansible.module_utils.common.text.converters import to_text
 from ..module_utils.proxmox import ProxmoxModule
 from ..module_utils.proxmox import proxmox_to_ansible_bool
 from ..module_utils.proxmox import string_to_list
-from ..module_utils.proxmox import remap_dictionary
 from ..module_utils.common_args import proxmox_auth_argument_spec
 from ..module_utils.common_args import proxmox_auth_required_one_of
 from ..module_utils.common_args import proxmox_auth_required_together
@@ -78,9 +98,6 @@ class PVERoleInfoModule(ProxmoxModule):
 
     @staticmethod
     def _ansible_format(role):
-        roles_map = {'roleid': 'name'}
-        role = remap_dictionary(role, roles_map)
-
         if 'special' in role:
             role['special'] = proxmox_to_ansible_bool(role['special'])
         if 'privs' in role:
