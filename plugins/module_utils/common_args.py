@@ -18,3 +18,11 @@ def proxmox_auth_argument_spec():
         api_validate_certs=dict(type='bool', default=False, aliases=['validate_certs'])
     )
     return options
+
+
+def proxmox_auth_required_one_of():
+    return [('api_password', 'api_token_secret')]
+
+
+def proxmox_auth_required_together():
+    return [('api_token_id', 'api_token_secret')]

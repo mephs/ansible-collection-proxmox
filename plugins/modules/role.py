@@ -156,9 +156,9 @@ from ..module_utils.proxmox import ansible_to_proxmox_bool
 from ..module_utils.proxmox import check_list_match
 from ..module_utils.proxmox import check_list_equal
 from ..module_utils.proxmox import list_to_string
-from ..module_utils.proxmox import proxmox_auth_required_one_of
-from ..module_utils.proxmox import proxmox_auth_required_together
 from ..module_utils.common_args import proxmox_auth_argument_spec
+from ..module_utils.common_args import proxmox_auth_required_one_of
+from ..module_utils.common_args import proxmox_auth_required_together
 
 
 class ProxmoxRoleModule(ProxmoxModule):

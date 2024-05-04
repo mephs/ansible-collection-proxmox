@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+# Copyright (c) 2020, Tristan Le Guern <tleguern at bouledef.eu>
 # Copyright (c) 2024, Mikhail Vorontsov (@mephs) <mvorontsov@tuta.io>
 
 # GNU General Public License v3.0+ (see COPYING or https://www.gnu.org/licenses/gpl-3.0.txt)
@@ -23,14 +24,6 @@ try:
 except ImportError:
     HAS_PROXMOXER = False
     PROXMOXER_IMP_ERR = traceback.format_exc()
-
-
-def proxmox_auth_required_one_of():
-    return [('pve_password', 'pve_token_secret')]
-
-
-def proxmox_auth_required_together():
-    return [('pve_token_id', 'pve_token_secret')]
 
 
 def check_list_match(list1, list2):
@@ -81,13 +74,13 @@ class ProxmoxModule(object):
             module.fail_json(msg='%s' % e, exception=traceback.format_exc())
 
     def _connect(self):
-        api_host = self.module.params['pve_host']
-        api_port = self.module.params['pve_port']
-        api_user = self.module.params['pve_user']
-        api_password = self.module.params['pve_password']
-        api_token_id = self.module.params['pve_token_id']
-        api_token_secret = self.module.params['pve_token_secret']
-        validate_certs = self.module.params['pve_validate_certs']
+        api_host = self.module.params.get('api_host')
+        api_port = self.module.params.get('api_port')
+        api_user = self.module.params.get('api_user')
+        api_password = self.module.params.get('api_password')
+        api_token_id = self.module.params.get('api_token_id')
+        api_token_secret = self.module.params.get('api_token_secret')
+        validate_certs = self.module.params.get('api_validate_certs')
 
         auth_args = {'user': api_user}
 
@@ -95,7 +88,7 @@ class ProxmoxModule(object):
             auth_args['password'] = api_password
         else:
             if self.proxmoxer_version < LooseVersion('1.1.0'):
-                self.module.fail_json('Using "token_name" and "token_value" require proxmoxer >= 1.1.0')
+                self.module.fail_json('Using "api_token_id" and "api_token_secret" require proxmoxer >= 1.1.0')
             auth_args['token_name'] = api_token_id
             auth_args['token_value'] = api_token_secret
 

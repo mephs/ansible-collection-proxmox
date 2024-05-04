@@ -37,15 +37,15 @@ options:
   api_password:
     description:
       - Specify the password for authentication.
-      - Either this or O(pve_token_id) must be specified.
+      - Either this or O(api_token_id) must be specified.
       - You can use E(PROXMOX_PASSWORD) environment variable.
     type: str
 
   api_token_id:
     description:
       - Specify the token ID.
-      - Either this or O(pve_password) must be specified.
-      - Should be used with O(pve_token_secret).
+      - Either this or O(api_password) must be specified.
+      - Should be used with O(api_token_secret).
       - You can use E(PROXMOX_TOKEN) environment variable.
     type: str
     aliases: ['token_id']
@@ -53,7 +53,7 @@ options:
   api_token_secret:
     description:
       - Specify the token secret.
-      - Should be used with O(pve_token_id).
+      - Should be used with O(api_token_id).
       - You can use E(PROXMOX_SECRET) environment variable.
     type: str
     aliases: ['token_secret']
