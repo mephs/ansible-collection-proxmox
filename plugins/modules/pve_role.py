@@ -11,7 +11,7 @@ __metaclass__ = type
 
 DOCUMENTATION = r'''
 ---
-module: role
+module: pve_role
 short_description: Manage Proxmox VE roles
 description:
   - Allows to add, modify or remove Proxmox VE roles.
@@ -58,7 +58,7 @@ author:
 
 EXAMPLES = r'''
 - name: Create an empty role
-  mephs.proxmox.role:
+  mephs.proxmox.pve_role:
     roleid: empty_role
     state: present
     api_host: node1
@@ -66,7 +66,7 @@ EXAMPLES = r'''
     api_password: Secret123
 
 - name: Create a role with given privileges
-  mephs.proxmox.role:
+  mephs.proxmox.pve_role:
     roleid: new_role
     state: present
     privs:
@@ -78,7 +78,7 @@ EXAMPLES = r'''
     api_password: Secret123
 
 - name: Add a privilege to a role
-  mephs.proxmox.role:
+  mephs.proxmox.pve_role:
     roleid: new_role
     state: present
     priv: VM.Snapshot.Rollback
@@ -88,7 +88,7 @@ EXAMPLES = r'''
     api_password: Secret123
 
 - name: Overwrite privileges in a role
-  mephs.proxmox.role:
+  mephs.proxmox.pve_role:
     roleid: new_role
     state: present
     privs:
@@ -102,7 +102,7 @@ EXAMPLES = r'''
     api_password: Secret123
 
 - name: Remove a role
-  mephs.proxmox.role:
+  mephs.proxmox.pve_role:
     name: new_role
     state: absent
     api_host: node1

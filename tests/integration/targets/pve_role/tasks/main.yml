@@ -1,6 +1,6 @@
 ---
 - name: Cleanup Proxmox VE Role
-  role:
+  pve_role:
     name: ansible_test_role
     state: absent
     api_host: "{{ api_host }}"
@@ -10,7 +10,7 @@
     api_password: "{{ api_password }}"
 
 - name: Create empty Proxmox VE Role
-  role:
+  pve_role:
     name: ansible_test_role
     state: present
     api_host: "{{ api_host }}"
@@ -25,7 +25,7 @@
       - proxmox_role_state is changed
 
 - name: Create empty Proxmox VE Role ( Idempotency test )
-  role:
+  pve_role:
     name: ansible_test_role
     state: present
     api_host: "{{ api_host }}"
@@ -40,7 +40,7 @@
       - proxmox_role_state_again is not changed
 
 - name: Cleanup Proxmox VE Role
-  role:
+  pve_role:
     name: ansible_test_role
     state: absent
     api_host: "{{ api_host }}"
@@ -50,7 +50,7 @@
     api_password: "{{ api_password }}"
 
 - name: Create Proxmox VE Role with privileges
-  role:
+  pve_role:
     name: ansible_test_role
     state: present
     privs: VM.Allocate
@@ -61,7 +61,7 @@
     api_password: "{{ api_password }}"
 
 - name: Update Proxmox VE Role with new privileges
-  role:
+  pve_role:
     name: ansible_test_role
     state: present
     privs:
@@ -81,7 +81,7 @@
       - proxmox_role_state_privs_update.new_privs | difference(['VM.Allocate', 'VM.Config.CPU', 'VM.Config.Memory']) | length == 0
 
 - name: Update Proxmox VE Role with new privileges ( Idempotency test )
-  role:
+  pve_role:
     name: ansible_test_role
     state: present
     privs:
@@ -100,7 +100,7 @@
       - proxmox_role_state_privs_update_again is not changed
 
 - name: Rewrite Proxmox VE Role with new privileges
-  role:
+  pve_role:
     name: ansible_test_role
     state: present
     privs:
@@ -120,7 +120,7 @@
       - proxmox_role_state_privs_rewrite.new_privs | difference(['VM.Config.CPU', 'VM.Config.Memory']) | length == 0
 
 - name: Rewrite Proxmox VE Role with new privileges ( Idempotency test )
-  role:
+  pve_role:
     name: ansible_test_role
     state: present
     privs:
@@ -139,7 +139,7 @@
       - proxmox_role_state_privs_rewrite_again is not changed
 
 - name: Delete all privileges from Proxmox VE Role
-  role:
+  pve_role:
     name: ansible_test_role
     state: present
     append: false
