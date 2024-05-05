@@ -10,7 +10,6 @@ from __future__ import absolute_import, division, print_function
 __metaclass__ = type
 
 from ansible.module_utils.basic import missing_required_lib
-from ansible.module_utils.common.text.converters import to_text
 from ansible.module_utils.compat.version import LooseVersion
 import traceback
 
@@ -19,6 +18,7 @@ PROXMOXER_IMP_ERR = None
 try:
     from proxmoxer import ProxmoxAPI
     from proxmoxer import __version__ as proxmoxer_version
+    from proxmoxer import ResourceException as proxmoxer_exception
 
     HAS_PROXMOXER = True
 except ImportError:
@@ -70,6 +70,7 @@ class ProxmoxModule(object):
             module.fail_json(msg=missing_required_lib('proxmoxer'), exception=PROXMOXER_IMP_ERR)
 
         self.module = module
+        self.proxmoxer_exception = proxmoxer_exception
         self.proxmoxer_version = proxmoxer_version
         self.proxmox_api = self._connect()
         # Test token validity

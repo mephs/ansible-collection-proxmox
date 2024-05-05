@@ -1,0 +1,315 @@
+---
+####################################################################
+# WARNING: These are designed specifically for Ansible tests       #
+# and should not be used as examples of how to write Ansible roles #
+####################################################################
+
+# Copyright (c) 2024, Mikhail Vorontsov (@mephs) <mvorontsov@tuta.io>
+# GNU General Public License v3.0+ (see COPYING or https://www.gnu.org/licenses/gpl-3.0.txt)
+# SPDX-License-Identifier: GPL-3.0-or-later
+
+- name: Empty role
+  block:
+    - name: Create role
+      pve_role:
+        name: test-role
+        state: present
+        api_host: "{{ api_host }}"
+        api_port: "{{ api_port }}"
+        api_validate_certs: false
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+      register: _result
+
+    - name: Ensure role is empty
+      pve_role_info:
+        name: test-role
+        api_host: "{{ api_host }}"
+        api_port: "{{ api_port }}"
+        api_validate_certs: false
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+      register: _is_empty
+
+    - assert:
+        that:
+          - _result is changed
+          - _is_empty.roles[0].roleid == _result.role.roleid
+          - _is_empty.roles[0].privs | length == 0
+
+    - name: Create role ( Idempotency )
+      pve_role:
+        name: test-role
+        state: present
+        api_host: "{{ api_host }}"
+        api_port: "{{ api_port }}"
+        api_validate_certs: false
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+      register: _result
+
+    - assert:
+        that:
+          - _result is not changed
+
+    - name: Cleanup role
+      pve_role:
+        name: test-role
+        state: absent
+        api_host: "{{ api_host }}"
+        api_port: "{{ api_port }}"
+        api_validate_certs: false
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+  rescue:
+    - name: Cleanup role
+      pve_role:
+        name: test-role
+        state: absent
+        api_host: "{{ api_host }}"
+        api_port: "{{ api_port }}"
+        api_validate_certs: false
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+
+- name: Role with privileges
+  block:
+    - name: Create role
+      pve_role:
+        name: test-role
+        state: present
+        privs: VM.Allocate
+        api_host: "{{ api_host }}"
+        api_port: "{{ api_port }}"
+        api_validate_certs: false
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+      register: _result
+
+    - name: Ensure role is created
+      pve_role_info:
+        name: test-role
+        api_host: "{{ api_host }}"
+        api_port: "{{ api_port }}"
+        api_validate_certs: false
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+      register: _is_created
+
+    - assert:
+        that:
+          - _result is changed
+          - _is_created.roles[0].roleid == _result.role.roleid
+          - _is_created.roles[0].privs | length == 1
+
+    - name: Create role ( Idempotency )
+      pve_role:
+        name: test-role
+        state: present
+        privs: VM.Allocate
+        api_host: "{{ api_host }}"
+        api_port: "{{ api_port }}"
+        api_validate_certs: false
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+      register: _result
+
+    - assert:
+        that:
+          - _result is not changed
+  rescue:
+    - name: Cleanup role
+      pve_role:
+        name: test-role
+        state: absent
+        api_host: "{{ api_host }}"
+        api_port: "{{ api_port }}"
+        api_validate_certs: false
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+
+- name: Update role
+  block:
+    - name: Append new privileges
+      pve_role:
+        name: test-role
+        state: present
+        privs:
+          - VM.Config.Memory
+          - VM.Config.CPU
+        append: true
+        api_host: "{{ api_host }}"
+        api_port: "{{ api_port }}"
+        api_validate_certs: false
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+      register: _result
+
+    - name: Ensure role is updated
+      pve_role_info:
+        name: test-role
+        api_host: "{{ api_host }}"
+        api_port: "{{ api_port }}"
+        api_validate_certs: false
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+      register: _is_updated
+
+    - assert:
+        that:
+          - _result is changed
+          - _is_updated.roles[0].roleid == _result.role.roleid
+          - _is_updated.roles[0].privs | length == 3
+          - "['VM.Allocate', 'VM.Config.CPU', 'VM.Config.Memory'] | difference(_is_updated.roles[0].privs) | length == 0"
+
+    - name: Append new privileges ( Idempotency )
+      pve_role:
+        name: test-role
+        state: present
+        privs:
+          - VM.Config.Memory
+          - VM.Config.CPU
+        append: true
+        api_host: "{{ api_host }}"
+        api_port: "{{ api_port }}"
+        api_validate_certs: false
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+      register: _result
+
+    - assert:
+        that:
+          - _result is not changed
+
+    - name: Rewrite privileges
+      pve_role:
+        name: test-role
+        state: present
+        privs:
+          - VM.Config.Memory
+          - VM.Config.CPU
+        append: false
+        api_host: "{{ api_host }}"
+        api_port: "{{ api_port }}"
+        api_validate_certs: false
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+      register: _result
+
+    - name: Ensure role is updated
+      pve_role_info:
+        name: test-role
+        api_host: "{{ api_host }}"
+        api_port: "{{ api_port }}"
+        api_validate_certs: false
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+      register: _is_updated
+
+    - assert:
+        that:
+          - _result is changed
+          - _is_updated.roles[0].roleid == _result.role.roleid
+          - _is_updated.roles[0].privs | length == 2
+          - "['VM.Config.CPU', 'VM.Config.Memory'] | difference(_is_updated.roles[0].privs) | length == 0"
+
+    - name: Rewrite privileges ( Idempotency )
+      pve_role:
+        name: test-role
+        state: present
+        privs:
+          - VM.Config.Memory
+          - VM.Config.CPU
+        append: false
+        api_host: "{{ api_host }}"
+        api_port: "{{ api_port }}"
+        api_validate_certs: false
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+      register: _result
+
+    - assert:
+        that:
+          - _result is not changed
+
+    - name: Delete all privileges from Proxmox VE Role
+      pve_role:
+        name: test-role
+        state: present
+        append: false
+        api_host: "{{ api_host }}"
+        api_port: "{{ api_port }}"
+        api_validate_certs: false
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+      register: _result
+
+    - name: Ensure role is updated
+      pve_role_info:
+        name: test-role
+        api_host: "{{ api_host }}"
+        api_port: "{{ api_port }}"
+        api_validate_certs: false
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+      register: _is_updated
+
+    - assert:
+        that:
+          - _result is changed
+          - _is_updated.roles[0].roleid == _result.role.roleid
+          - _is_updated.roles[0].privs | length == 0
+  rescue:
+    - name: Cleanup role
+      pve_role:
+        name: test-role
+        state: absent
+        api_host: "{{ api_host }}"
+        api_port: "{{ api_port }}"
+        api_validate_certs: false
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+
+- name: Delete role
+  block:
+    - name: Delete role
+      pve_role:
+        name: test-role
+        state: absent
+        api_host: "{{ api_host }}"
+        api_port: "{{ api_port }}"
+        api_validate_certs: false
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+      register: _result
+
+    - name: Ensure role is deleted
+      pve_role_info:
+        name: test-role
+        api_host: "{{ api_host }}"
+        api_port: "{{ api_port }}"
+        api_validate_certs: false
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+      register: _is_deleted
+
+    - assert:
+        that:
+          - _result is changed
+          - _is_deleted.roles[0].roleid is none
+          - _is_deleted.roles[0].privs is none
+
+    - name: Delete non-existing role
+      pve_role:
+        name: test-role
+        state: absent
+        api_host: "{{ api_host }}"
+        api_port: "{{ api_port }}"
+        api_validate_certs: false
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+      register: _result
+
+    - assert:
+        that:
+          - _result is not changed

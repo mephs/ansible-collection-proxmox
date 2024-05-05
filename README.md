@@ -25,7 +25,7 @@ To install these dependencies you have the following options:
 
 ## Included content
 
-* `role` module for managing PVE roles
+* `pve_role` module for managing PVE roles
 * `pve_role_info` module for retrieve information about roles
 
 ## Using this collection
