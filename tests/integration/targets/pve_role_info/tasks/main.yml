@@ -1,0 +1,75 @@
+---
+####################################################################
+# WARNING: These are designed specifically for Ansible tests       #
+# and should not be used as examples of how to write Ansible roles #
+####################################################################
+
+# Copyright (c) 2024, Mikhail Vorontsov (@mephs) <mvorontsov@tuta.io>
+# GNU General Public License v3.0+ (see COPYING or https://www.gnu.org/licenses/gpl-3.0.txt)
+# SPDX-License-Identifier: GPL-3.0-or-later
+
+- name: List all roles
+  pve_role_info:
+    api_host: "{{ api_host }}"
+    api_port: "{{ api_port }}"
+    api_validate_certs: false
+    api_user: "{{ api_user }}"
+    api_password: "{{ api_password }}"
+  register: _result
+
+- assert:
+    that:
+      - _result is not changed
+      - _result.roles is defined
+      - _result.roles | length > 1
+
+- name: Get information about role
+  pve_role_info:
+    name: Administrator
+    api_host: "{{ api_host }}"
+    api_port: "{{ api_port }}"
+    api_validate_certs: false
+    api_user: "{{ api_user }}"
+    api_password: "{{ api_password }}"
+  register: _result
+
+- assert:
+    that:
+      - _result is not changed
+      - _result.roles is defined
+      - _result.roles[0] | length == 2
+      - _result.roles[0].roleid == 'Administrator'
+
+- name: Get information about empty role
+  pve_role_info:
+    name: NoAccess
+    api_host: "{{ api_host }}"
+    api_port: "{{ api_port }}"
+    api_validate_certs: false
+    api_user: "{{ api_user }}"
+    api_password: "{{ api_password }}"
+  register: _result
+
+- assert:
+    that:
+      - _result is not changed
+      - _result.roles is defined
+      - _result.roles[0] | length == 2
+      - _result.roles[0].roleid == 'NoAccess'
+      - _result.roles[0].privs | length == 0
+
+- name: Get information about non-existent role
+  pve_role_info:
+    name: non-existent-role
+    api_host: "{{ api_host }}"
+    api_port: "{{ api_port }}"
+    api_validate_certs: false
+    api_user: "{{ api_user }}"
+    api_password: "{{ api_password }}"
+  register: _result
+
+- assert:
+    that:
+      - _result is not changed
+      - _result.roles[0].roleid is none
+      - _result.roles[0].privs is none
