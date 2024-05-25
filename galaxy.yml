@@ -8,7 +8,7 @@ name: proxmox
 version: 1.0.0
 readme: README.md
 authors:
-  - Mikhail Vorontsov (mvorontsov@tuta.io)
+  - Mikhail Vorontsov <mvorontsov@tuta.io>
 description: Managing the Proxmox VE cluster via the Proxmox VE API.
 license:
   - GPL-3.0-or-later
