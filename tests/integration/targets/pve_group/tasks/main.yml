@@ -1,0 +1,228 @@
+---
+####################################################################
+# WARNING: These are designed specifically for Ansible tests       #
+# and should not be used as examples of how to write Ansible roles #
+####################################################################
+
+# Copyright (c) 2024, Mikhail Vorontsov (@mephs) <mvorontsov@tuta.io>
+# GNU General Public License v3.0+ (see COPYING or https://www.gnu.org/licenses/gpl-3.0.txt)
+# SPDX-License-Identifier: GPL-3.0-or-later
+
+- name: Group with no comment
+  block:
+    - name: Create group
+      pve_group:
+        name: test-group
+        state: present
+        api_host: "{{ api_host }}"
+        api_port: "{{ api_port }}"
+        api_validate_certs: false
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+      register: _result
+
+    - name: Ensure comment is empty
+      pve_group_info:
+        name: test-group
+        api_host: "{{ api_host }}"
+        api_port: "{{ api_port }}"
+        api_validate_certs: false
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+      register: _is_empty
+
+    - assert:
+        that:
+          - _result is changed
+          - _is_empty.groups[0].groupid == _result.group.groupid
+          - not _is_empty.groups[0].comment is defined
+
+    - name: Create group ( Idempotency )
+      pve_group:
+        name: test-group
+        state: present
+        api_host: "{{ api_host }}"
+        api_port: "{{ api_port }}"
+        api_validate_certs: false
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+      register: _result
+
+    - assert:
+        that:
+          - _result is not changed
+
+    - name: Cleanup group
+      pve_group:
+        name: test-group
+        state: absent
+        api_host: "{{ api_host }}"
+        api_port: "{{ api_port }}"
+        api_validate_certs: false
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+  rescue:
+    - name: Cleanup group
+      pve_group:
+        name: test-group
+        state: absent
+        api_host: "{{ api_host }}"
+        api_port: "{{ api_port }}"
+        api_validate_certs: false
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+
+- name: Group with comment
+  block:
+    - name: Create group
+      pve_group:
+        name: test-group
+        state: present
+        comment: Test group
+        api_host: "{{ api_host }}"
+        api_port: "{{ api_port }}"
+        api_validate_certs: false
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+      register: _result
+
+    - name: Ensure group is created
+      pve_group_info:
+        name: test-group
+        api_host: "{{ api_host }}"
+        api_port: "{{ api_port }}"
+        api_validate_certs: false
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+      register: _is_created
+
+    - assert:
+        that:
+          - _result is changed
+          - _is_created.groups[0].groupid == _result.group.groupid
+          - _is_created.groups[0].comment == "Test group"
+
+    - name: Create group ( Idempotency )
+      pve_group:
+        name: test-group
+        state: present
+        comment: Test group
+        api_host: "{{ api_host }}"
+        api_port: "{{ api_port }}"
+        api_validate_certs: false
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+      register: _result
+
+    - assert:
+        that:
+          - _result is not changed
+  rescue:
+    - name: Cleanup group
+      pve_group:
+        name: test-group
+        state: absent
+        api_host: "{{ api_host }}"
+        api_port: "{{ api_port }}"
+        api_validate_certs: false
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+
+- name: Update group
+  block:
+    - name: Update comment
+      pve_group:
+        name: test-group
+        state: present
+        comment: Test group with updated comment
+        api_host: "{{ api_host }}"
+        api_port: "{{ api_port }}"
+        api_validate_certs: false
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+      register: _result
+
+    - name: Ensure group is updated
+      pve_group_info:
+        name: test-group
+        api_host: "{{ api_host }}"
+        api_port: "{{ api_port }}"
+        api_validate_certs: false
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+      register: _is_updated
+
+    - assert:
+        that:
+          - _result is changed
+          - _is_updated.groups[0].groupid == _result.group.groupid
+          - _is_updated.groups[0].comment == "Test group with updated comment"
+
+    - name: Update comment ( Idempotency )
+      pve_group:
+        name: test-group
+        state: present
+        comment: Test group with updated comment
+        api_host: "{{ api_host }}"
+        api_port: "{{ api_port }}"
+        api_validate_certs: false
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+      register: _result
+
+    - assert:
+        that:
+          - _result is not changed
+  rescue:
+    - name: Cleanup group
+      pve_group:
+        name: test-group
+        state: absent
+        api_host: "{{ api_host }}"
+        api_port: "{{ api_port }}"
+        api_validate_certs: false
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+
+- name: Delete group
+  block:
+    - name: Delete group
+      pve_group:
+        name: test-group
+        state: absent
+        api_host: "{{ api_host }}"
+        api_port: "{{ api_port }}"
+        api_validate_certs: false
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+      register: _result
+
+    - name: Ensure group is deleted
+      pve_group_info:
+        name: test-group
+        api_host: "{{ api_host }}"
+        api_port: "{{ api_port }}"
+        api_validate_certs: false
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+      register: _is_deleted
+
+    - assert:
+        that:
+          - _result is changed
+          - _is_deleted.groups[0].groupid is none
+
+    - name: Delete non-existing group
+      pve_group:
+        name: test-group
+        state: absent
+        api_host: "{{ api_host }}"
+        api_port: "{{ api_port }}"
+        api_validate_certs: false
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+      register: _result
+
+    - assert:
+        that:
+          - _result is not changed
