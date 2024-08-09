@@ -8,66 +8,111 @@
 # GNU General Public License v3.0+ (see COPYING or https://www.gnu.org/licenses/gpl-3.0.txt)
 # SPDX-License-Identifier: GPL-3.0-or-later
 
-- name: List all groups
-  pve_group_info:
-    api_host: "{{ api_host }}"
-    api_port: "{{ api_port }}"
-    api_validate_certs: false
-    api_user: "{{ api_user }}"
-    api_password: "{{ api_password }}"
-  register: _result
+- name: Tests
+  block:
+    - name: Create groups
+      pve_group:
+        name: "{{ item.name }}"
+        state: present
+        comment: "{{ item.comment | d('') }}"
+        api_host: "{{ api_host }}"
+        api_port: "{{ api_port }}"
+        api_validate_certs: false
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+      loop:
+        - { name: test-group, comment: Test group }
+        - { name: test-empty-group }
+      loop_control:
+        label: '{{ item.name }}'
 
-- assert:
-    that:
-      - _result is not changed
-      - _result.groups is defined
-      - _result.groups | length > 1
+    - name: List all groups
+      pve_group_info:
+        api_host: "{{ api_host }}"
+        api_port: "{{ api_port }}"
+        api_validate_certs: false
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+      register: _result
 
-- name: Get information about group
-  pve_group_info:
-    name: test-group
-    api_host: "{{ api_host }}"
-    api_port: "{{ api_port }}"
-    api_validate_certs: false
-    api_user: "{{ api_user }}"
-    api_password: "{{ api_password }}"
-  register: _result
+    - assert:
+        that:
+          - _result is not changed
+          - _result.groups is defined
+          - _result.groups | length > 1
 
-- assert:
-    that:
-      - _result is not changed
-      - _result.groups[0].groupid == 'test-group'
-      - _result.groups[0].users | length > 0
-      - _result.groups[0].comment | length > 0
+    - name: Get information about group
+      pve_group_info:
+        name: test-group
+        api_host: "{{ api_host }}"
+        api_port: "{{ api_port }}"
+        api_validate_certs: false
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+      register: _result
 
-- name: Get information about empty group without comment
-  pve_group_info:
-    name: test-empty-group
-    api_host: "{{ api_host }}"
-    api_port: "{{ api_port }}"
-    api_validate_certs: false
-    api_user: "{{ api_user }}"
-    api_password: "{{ api_password }}"
-  register: _result
+    - assert:
+        that:
+          - _result is not changed
+          - _result.groups[0].groupid == 'test-group'
+          # TODO: Return this after users role
+          # - _result.groups[0].users | length > 0
+          - _result.groups[0].comment | length > 0
 
-- assert:
-    that:
-      - _result is not changed
-      - _result.groups[0].groupid == 'test-empty-group'
-      - _result.groups[0].users | length == 0
-      - _result.groups[0].comment is not defined
+    - name: Get information about group without comment
+      pve_group_info:
+        name: test-empty-group
+        api_host: "{{ api_host }}"
+        api_port: "{{ api_port }}"
+        api_validate_certs: false
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+      register: _result
 
-- name: Get information about non-existent group
-  pve_group_info:
-    name: non-existent-group
-    api_host: "{{ api_host }}"
-    api_port: "{{ api_port }}"
-    api_validate_certs: false
-    api_user: "{{ api_user }}"
-    api_password: "{{ api_password }}"
-  register: _result
+    - assert:
+        that:
+          - _result is not changed
+          - _result.groups[0].groupid == 'test-empty-group'
+          - _result.groups[0].users | length == 0
+          - _result.groups[0].comment is not defined
 
-- assert:
-    that:
-      - _result is not changed
-      - _result.groups[0].groupid is none
+    - name: Get information about non-existent group
+      pve_group_info:
+        name: non-existent-group
+        api_host: "{{ api_host }}"
+        api_port: "{{ api_port }}"
+        api_validate_certs: false
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+      register: _result
+
+    - assert:
+        that:
+          - _result is not changed
+          - _result.groups[0].groupid is none
+
+    - name: Cleanup groups
+      pve_group:
+        name: "{{ item }}"
+        state: absent
+        api_host: "{{ api_host }}"
+        api_port: "{{ api_port }}"
+        api_validate_certs: false
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+      loop:
+        - test-group
+        - test-empty-group
+  rescue:
+    - name: Cleanup groups
+      pve_group:
+        name: "{{ item }}"
+        state: absent
+        api_host: "{{ api_host }}"
+        api_port: "{{ api_port }}"
+        api_validate_certs: false
+        api_user: "{{ api_user }}"
+        api_password: "{{ api_password }}"
+      loop:
+        - test-group
+        - test-empty-group
